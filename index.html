@@ -232,7 +232,7 @@ function open(id){
   chapId=id;tab='ed';dirty=false;armed=false;savedAt=c.updatedAt;
   $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><button id="sp">Spelling</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span><button id="dc">Delete</button></div>
   <div class="warn" id="warn" hidden>Your co-author saved changes to this chapter. <button id="ld">Load their version</button> <small>(replaces your unsaved edits)</small></div>
-  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
+  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="undo" title="Undo (Ctrl+Z)">↶</button><button data-c="redo" title="Redo (Ctrl+Y)">↷</button><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
   <div class="foot"><span id="wcn"></span><span id="lb" class="muted"></span></div>
   <div class="cm" id="vh" hidden><h3>Version history</h3><button id="sv">Save a version now</button><div id="vl" style="margin-top:10px"></div></div>
   <div class="cm"><h3>Inline comments</h3><div id="mkl"></div></div>
@@ -299,10 +299,26 @@ function loadTypo(){
     document.head.appendChild(sc);
   }).catch(e=>{typoP=null;throw e}));
 }
-function spellFix(from,to){
-  const tw=document.createTreeWalker($('#cb'),NodeFilter.SHOW_TEXT),rx=new RegExp("(^|[^A-Za-z])"+rxEsc(from)+"(?![A-Za-z]|['’][A-Za-z])",'g'),ns=[];
+
+// Replace text through the browser's own editing commands so Undo/Redo can reverse it.
+function edSub(rx,to,pre){
+  const cb=$('#cb'),sel=getSelection(),tw=document.createTreeWalker(cb,NodeFilter.SHOW_TEXT),ns=[];let n=0;
   while(tw.nextNode())ns.push(tw.currentNode);
-  ns.forEach(n=>{n.nodeValue=n.nodeValue.replace(rx,(m,p)=>p+to)});
+  cb.focus();
+  ns.forEach(t=>{
+    const ms=[];let m;rx.lastIndex=0;
+    while((m=rx.exec(t.nodeValue))){const a=m.index+(pre?m[1].length:0);ms.push([a,m[0].length-(pre?m[1].length:0)]);if(m[0]==='')rx.lastIndex++}
+    for(let i=ms.length-1;i>=0&&t.isConnected;i--){
+      const r=document.createRange();r.setStart(t,ms[i][0]);r.setEnd(t,ms[i][0]+ms[i][1]);
+      sel.removeAllRanges();sel.addRange(r);
+      document.execCommand(to===''?'delete':'insertText',false,to);n++;
+    }
+  });
+  return n;
+}
+function spellFix(from,to){
+  if(from===to)return;
+  edSub(new RegExp("(^|[^A-Za-z])"+rxEsc(from)+"(?![A-Za-z]|['’][A-Za-z])",'g'),to,true);
   $('#cb').dispatchEvent(new Event('input'));
 }
 async function spellRun(){
@@ -635,11 +651,9 @@ function showMemos(){
 }
 const rxEsc=q=>q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function replAll(){
-  const q=$('#fi').value,r=$('#fo').value,cb=$('#cb');if(!q)return;
-  const rx=new RegExp(rxEsc(q),'gi'),w=document.createTreeWalker(cb,NodeFilter.SHOW_TEXT),a=[];let n=0;
-  while(w.nextNode())a.push(w.currentNode);
-  a.forEach(t=>{const v=t.nodeValue.replace(rx,()=>{n++;return r});if(v!==t.nodeValue)t.nodeValue=v});
-  if(n)cb.dispatchEvent(new Event('input'));
+  const q=$('#fi').value,r=$('#fo').value;if(!q)return;
+  const n=edSub(new RegExp(rxEsc(q),'gi'),r,false);
+  if(n)$('#cb').dispatchEvent(new Event('input'));
   toast(n?'Replaced '+n+'.':'No matches.');
 }
 let asts=null;use('assets').then(a=>{asts=a});
