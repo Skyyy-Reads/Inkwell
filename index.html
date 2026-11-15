@@ -323,7 +323,7 @@ function updNovel(){
   const n=novels.find(x=>x.id===novelId);
   $('#nvt').textContent=n?n.title:(novels.length?'Novel not found':'Loading…');
   $('#nvs').textContent=n&&n.synopsis||'';
-  {const dz=$('#dz');if(dz){const mine=!!(n&&myId&&n.by===myId),t=n&&(n.title||'').trim();dz.hidden=!mine;$('#rnn').hidden=!mine;if(!mine)$('#rnr').hidden=true;$('#dnv').disabled=!(mine&&t&&$('#dzi').value.trim()===t)}}
+  {const dz=$('#dz');if(dz){const mine=!!(n&&myId&&n.by===myId),t=n&&(n.title||'').trim();const cd=mine||(!!n&&!!myId&&isAdmin());dz.hidden=!cd;$('#rnn').hidden=!mine;if(!mine)$('#rnr').hidden=true;$('#dnv').disabled=!(cd&&t&&$('#dzi').value.trim()===t)}}
   const tw=chapters.reduce((a,c)=>a+wc(c.content),0),g=n&&n.goal||0;
   $('#gp').innerHTML=`<small>${tw.toLocaleString()} words${g?` of ${g.toLocaleString()}`:''}</small>`+(g?`<div class="prog"><i style="width:${Math.min(100,tw/g*100)}%"></i></div>`:'');
   if(document.activeElement!==$('#gi'))$('#gi').value=g||'';
@@ -380,7 +380,7 @@ function open(id){
    cb.addEventListener('keyup',e=>{if(document.body.classList.contains('focus')&&(e.key==='ArrowUp'||e.key==='ArrowDown'))fsType()});
    $('#fsg').onchange=()=>{try{localStorage.setItem('ink-fsg',$('#fsg').value)}catch(_){}fsTick()};
    baseHtml=cb.html;svTick();}
-  {const dz=$('#cdz'),b=$('#cdl');dz.hidden=!canRen(c);b.onclick=()=>{if(b.dataset.a){delChapter(id)}else{b.dataset.a=1;b.textContent='Click again to delete forever';setTimeout(()=>{if(b.isConnected){delete b.dataset.a;b.textContent='🗑 Delete this chapter'}},4000)}}}
+  {const dz=$('#cdz'),b=$('#cdl');dz.hidden=!canDel(c);b.onclick=()=>{if(b.dataset.a){delChapter(id)}else{b.dataset.a=1;b.textContent='Click again to delete forever';setTimeout(()=>{if(b.isConnected){delete b.dataset.a;b.textContent='🗑 Delete this chapter'}},4000)}}}
 }
 function fill(c){
   $('#ct').value=c.title||'';$('#ct').readOnly=!canRen(c)||!$('#rd').hidden;$('#ct').title=canRen(c)?'':'Only the person who started this chapter can rename it';rte($('#cb'));if(c.html)$('#cb').html=c.html;else $('#cb').value=c.content||'';$('#ctg').value=c.tags||'';$('#cwt').value=c.target||'';$('#sts').value=c.status||'Draft';lastWc=wc(c.content);
@@ -626,6 +626,8 @@ function showVh(id){
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save()}});
 let cxf='All';
 // Chapter titles can be changed only by the person who started that chapter (the novel's starter for older chapters with no recorded author).
+const isAdmin=()=>myName==='RainErmine';
+function canDel(c){return !!(c&&myId&&(isAdmin()||canRen(c)))}
 function canRen(c){
   if(!myId||!c)return false;
   if(c.by)return c.by===myId;
@@ -833,7 +835,7 @@ function showDict(w){
 // ---- Delete one chapter (the person who started it, or who started the novel) ----
 async function delChapter(id){
   const c=chapters.find(x=>x.id===id);
-  if(!c||!canRen(c))return toast('Only the person who started this chapter or the novel can delete it.');
+  if(!c||!canDel(c))return toast('Only the person who started this chapter or the novel can delete it.');
   clearTimeout(timer);dirty=false;armed=false;
   toast('Deleting “'+(c.title||'chapter')+'”…');
   const base='novels/'+novelId+'/chapters/'+id;
@@ -845,7 +847,7 @@ async function delChapter(id){
 }
 async function delNovel(id){
   const n=novels.find(x=>x.id===id);
-  if(!n||!myId||n.by!==myId)return toast('Only the person who started this novel can delete it.');
+  if(!n||!myId||(n.by!==myId&&!isAdmin()))return toast('Only the person who started this novel can delete it.');
   const ti=$('#dzi');if(novelId!==id||!ti||ti.value.trim()!==(n.title||'').trim())return toast('Type the novel’s title to confirm.');
   clearTimeout(timer);dirty=false;
   if(novelId===id)location.hash='';
