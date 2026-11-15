@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Anyone signed in (i.e. anyone who opened your site and picked a name) can use the data.
+    // Keep your site's link private. To lock it down further, see README.md.
+    function ok() { return request.auth != null; }
+    match /novels/{path=**}   { allow read, write: if ok(); }
+    match /profiles/{u}       { allow read: if ok(); allow write: if ok() && request.auth.uid == u; }
+    match /presence/{u}       { allow read: if ok(); allow write: if ok() && request.auth.uid == u; }
+    match /data/users/{u}/{path=**} { allow read, write: if ok() && request.auth.uid == u; }
+  }
+}

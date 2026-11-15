@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inkwell: Co-write Webnovels</title>
+<style>
+:root{--bg:#faf7f2;--fg:#2a2622;--mut:#7a7167;--card:#fff;--line:#e6dfd4;--acc:#8a4b2a;--accfg:#fff;--warn:#fff3d6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a18;--fg:#ece6dd;--mut:#a39a8e;--card:#262320;--line:#3a352f;--acc:#d9915f;--accfg:#1c1a18;--warn:#3d3319}}
+:root[data-theme="dark"]{--bg:#1c1a18;--fg:#ece6dd;--mut:#a39a8e;--card:#262320;--line:#3a352f;--acc:#d9915f;--accfg:#1c1a18;--warn:#3d3319}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)}
+.brand{font:700 20px Georgia,"Times New Roman",serif}
+.who,.muted,small{color:var(--mut)}
+.wrap{max-width:820px;margin:0 auto;padding:24px 20px}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:.2em 0}
+input,textarea,button{font:inherit;color:inherit}
+input,textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer}
+button.pri,button.on2{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.row input{flex:1 1 200px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card:hover{border-color:var(--acc)}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 60px)}
+aside{border-right:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:8px}
+.ch{display:block;width:100%;text-align:left}
+.ch small{display:block}
+.ch.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
+#ed{padding:18px 24px;max-width:820px;width:100%}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.bar .sp{flex:1}
+.ctitle{font:700 26px Georgia,serif;border:none;background:transparent;padding:6px 0}
+#cb{min-height:60vh;font:18px/1.8 Georgia,"Times New Roman",serif;resize:vertical}
+.read{font:18px/1.9 Georgia,"Times New Roman",serif}
+.read p{margin:0 0 1em;text-indent:1.5em}
+.warn{background:var(--warn);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.foot{display:flex;justify-content:space-between;margin-top:8px;font-size:14px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;max-width:90%}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;border-radius:99px;padding:1px 8px;border:1px solid var(--line);margin-left:6px;vertical-align:middle;color:var(--mut)}
+.badge.Ready{border-color:var(--acc);color:var(--acc)}
+.badge.Published{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.note textarea{min-height:90px;margin-top:8px}
+.nt{display:flex;gap:8px;align-items:center}
+.book{max-width:680px;margin:0 auto}
+.book h2{text-align:center;margin-top:2em}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:4px}
+.prog i{display:block;height:100%;background:var(--acc)}
+.prog:empty{display:none}
+.pin{padding:4px 10px}
+.cm{margin-top:28px;border-top:1px solid var(--line);padding-top:10px}
+.cm .note{padding:8px 12px;margin-bottom:6px}
+#xf{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:5}
+.focus #xf{display:block}
+.focus aside,.focus .top{display:none}
+.focus .layout{grid-template-columns:1fr}
+.focus #ed{margin:0 auto}
+.tp{text-align:center;margin:1em 0 2.5em}
+.book .read{font-size:var(--fs,18px)}
+.ch small+small{font-style:italic}
+span[style*="background-color"]{color:#2a2622}
+.at{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.atc{display:inline-flex;gap:6px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px}.atc img{max-height:48px;border-radius:4px}.atc a{text-decoration:underline}.atb{cursor:pointer;color:var(--acc);font-size:14px}
+.tb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 8px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:6px 0;z-index:3}
+.tb[hidden]{display:none}
+.tb button{min-width:36px}
+div#cb{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;outline:none;overflow-wrap:anywhere;min-height:60vh;font:18px/1.8 Georgia,"Times New Roman",serif}
+div#cb:focus{border-color:var(--acc)}
+div#cb p{margin:0 0 1em}
+div#cb:empty:before{content:attr(data-ph);color:var(--mut)}
+hr{border:0;margin:1.5em 0;text-align:center;height:1.5em}
+hr:before{content:"* * *";letter-spacing:.6em;color:var(--mut)}
+.tp p{text-indent:0}
+#tg{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:38px;height:38px;padding:0;border-radius:50%;z-index:4}
+@media (max-width:700px){.layout{grid-template-columns:1fr}aside{border-right:none;border-bottom:1px solid var(--line)}#ed{padding:14px}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" hidden></div>
+<button id="xf">Exit focus</button>
+<button id="tg" title="Switch light or dark theme">◐</button>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+// ====== PASTE YOUR FIREBASE WEB CONFIG HERE (Firebase console > Project settings > Your apps) ======
+const FIREBASE_CONFIG={apiKey:"AIzaSyBLunfez0vVDKxRwDy3q5JXXC9JHyZl_m8",authDomain:"inkwell-ade0e.firebaseapp.com",projectId:"inkwell-ade0e",appId:"1:167126808618:web:2c30684ce1a232edca2b53"};
+// ====================================================================================================
+// Adapter: gives the app the same db/user/room/downloads interface it had on claude.ai, backed by Firebase.
+(()=>{
+const ok=!!(FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.projectId),$a=()=>document.getElementById('app');
+let fdb=null,auth=null,authP=null,cache={};
+function setup(){$a().innerHTML='<div class="wrap"><h1>Almost there</h1><p class="muted">Add your Firebase config at the top of this file (see README.md), then reload.</p></div>'}
+function signedIn(){
+  return authP||(authP=new Promise(res=>{
+    auth.onAuthStateChanged(u=>{
+      if(u)return res(u);
+      $a().innerHTML='<div class="wrap"><h1>✒️ Inkwell</h1><p class="muted">Pick the name your co-author will see.</p><div class="row"><input id="gnm" placeholder="Your name" maxlength="40"><button class="pri" id="gsi">Start writing</button></div></div>';
+      const gi=document.getElementById('gnm');try{gi.value=localStorage.getItem('ink-name')||''}catch(e){}
+      const go=()=>{const n=gi.value.trim();if(!n)return gi.focus();try{localStorage.setItem('ink-name',n)}catch(e){}auth.signInAnonymously().catch(x=>alert(x.message))};
+      document.getElementById('gsi').onclick=go;gi.onkeydown=e=>{if(e.key==='Enter')go()};
+    });
+  }));
+}
+const userNs={
+  me:async()=>{const u=await signedIn();let name='Guest';try{name=localStorage.getItem('ink-name')||'Guest'}catch(e){}await fdb.doc('profiles/'+u.uid).set({name},{merge:true});return{id:u.uid,name}},
+  id:async()=>(await signedIn()).uid,
+  profiles:async ids=>{const o={};await Promise.all(ids.map(async i=>{try{const s=await fdb.doc('profiles/'+i).get();o[i]={name:s.exists?s.data().name:''}}catch(e){o[i]={name:''}}}));return o}
+};
+const dl={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);return{status:'saved'}}};
+async function mkRoom(){
+  const u=await signedIn(),col=fdb.collection('presence'),ref=col.doc(u.uid);let cur={},list=[],fns=[];
+  const beat=()=>ref.set({...cur,uid:u.uid,at:Date.now()}).catch(()=>{});
+  col.onSnapshot(s=>{list=s.docs.map(d=>d.data());fns.forEach(f=>f())},()=>{});
+  setInterval(beat,15000);setInterval(()=>fns.forEach(f=>f()),10000);
+  window.addEventListener('beforeunload',()=>ref.delete().catch(()=>{}));
+  return{presence:async p=>{cur=p;await beat()},peers:()=>list.filter(d=>Date.now()-d.at<40000).map(d=>({isMe:d.uid===u.uid,presence:d})),onPeers:f=>fns.push(f)};
+}
+async function load(n){
+  if(!ok){setup();return new Promise(()=>{})}
+  if(!fdb){firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();fdb=firebase.firestore()}
+  if(n==='db'){await signedIn();return fdb}
+  if(n==='user'){await signedIn();return userNs}
+  if(n==='room')return mkRoom();
+  if(n==='downloads')return dl;
+  return null; // 'assets' (file attachments) is off in the GitHub build
+}
+window.claude={use:n=>cache[n]||(cache[n]=load(n))};
+})();
+</script>
+<script>
+(async()=>{
+const $=s=>document.querySelector(s), app=$('#app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wc=t=>((t||'').match(/\S+/g)||[]).length;
+let db=null,user=null,myId=null,myName='Guest',names={},novels=[],chapters=[],novelId=null,chapId=null,pending=null;
+let unsubC=null,dirty=false,timer=null,savedAt=0,built=false,armed=false,unsubN2=null,notes=[],tab='ed',drafts=false;
+const nm=id=>id===myId?'you':(names[id]||'Someone');
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,4500)}
+function fail(e){toast(e&&e.code==='not_granted'?'You can view this but not edit. Ask the owner to make you a Contributor.':'Something went wrong: '+((e&&e.message)||e))}
+
+app.innerHTML='<p class="wrap muted">Loading…</p>';
+const use=window.claude&&claude.use?claude.use.bind(claude):async()=>null;
+db=await use('db');user=await use('user');
+if(!db){app.innerHTML='<div class="wrap"><h1>Sign in to start writing</h1><p class="muted">Open this page in claude.ai while signed in to co-write.</p></div>';return}
+try{const me=await user.me();myId=me.id;myName=me.name||'Guest'}catch(e){}
+
+async function resolve(ids){
+  ids=[...new Set(ids.filter(Boolean))].filter(i=>!names[i]);
+  if(!ids.length||!user)return;
+  try{const p=await user.profiles(ids);for(const i in p)names[i]=p[i].name||'Someone'}catch(e){}
+  refresh();
+}
+function refresh(){novelId?(updNovel(),showStats(),chapId&&(showCm(chapId),showVh(chapId))):updHome()}
+
+function buildHome(){
+  app.innerHTML=`<div class="top"><div class="brand">✒️ Inkwell</div><div class="who">${esc(myName)}</div></div>
+  <main class="wrap"><h1>Your novels</h1><p class="muted">Start a story, then share this page’s link with your co-author.</p>
+  <div class="row"><input id="nt" placeholder="Novel title"><input id="ns" placeholder="One-line premise (optional)"><button class="pri" id="nc">Create novel</button></div>
+  <div id="list" class="grid"></div></main>`;
+  $('#nc').onclick=()=>{
+    const title=$('#nt').value.trim();if(!title)return toast('Give your novel a title first.');
+    db.collection('novels').add({title,synopsis:$('#ns').value.trim(),by:myId,createdAt:Date.now()}).then(r=>{location.hash=r.id}).catch(fail);
+  };
+}
+function updHome(){
+  const l=$('#list');if(!l)return;
+  l.innerHTML=novels.length?novels.map(n=>`<a class="card" href="#${n.id}"><h3>${esc(n.title)}</h3><p class="muted">${esc(n.synopsis)}</p><small>Started by ${esc(nm(n.by))}</small></a>`).join(''):'<p class="muted">No novels yet. Create the first one above.</p>';
+}
+
+function buildNovel(){
+  app.innerHTML=`<div class="top"><a href="#" class="brand" id="back">← Inkwell</a><div class="who" id="pr">${esc(myName)}</div></div>
+  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button></aside>
+  <section id="ed"><p class="muted">Pick or create a chapter to begin.</p></section></div>`;
+  $('#back').onclick=async e=>{await save()};
+  $('#bcx').onclick=async()=>{await save();chapId=null;updNovel();setPres();showCodex()};
+  $('#bbk').onclick=async()=>{await save();chapId=null;updNovel();setPres();showBook()};
+  $('#sq').oninput=updNovel;
+  $('#bol').onclick=async()=>{await save();chapId=null;updNovel();setPres();showOutline()};
+  $('#btl').onclick=async()=>{await save();chapId=null;updNovel();setPres();showTimeline()};
+  $('#bnt').onclick=async()=>{await save();chapId=null;updNovel();setPres();showMemos()};
+  $('#bsp').onclick=async()=>{await save();chapId=null;updNovel();showSpaces();setPres()};
+  $('#bfl').onclick=async()=>{await save();chapId=null;updNovel();showFiles();setPres()};
+  $('#sp').onclick=e=>{const b=e.target.closest('button');if(!b)return;const m=+b.dataset.m;if(m){sprintEnd=Date.now()+m*60000;sprintW=0}else sprintEnd=0;$('#sp').dataset.s='';sprintUI()};
+  $('#bpr').onclick=()=>{const p=$('#pm');p.textContent=PROMPTS[Math.floor(Math.random()*PROMPTS.length)];p.hidden=false};
+  $('#gi').onchange=e=>db.doc('novels/'+novelId).update({goal:Math.max(0,parseInt(e.target.value)||0)}).catch(fail);
+  $('#chl').onclick=async e=>{
+    const b=e.target.closest('.ch');if(!b||b.dataset.id===chapId)return;if(b.dataset.cx){await save();chapId=null;updNovel();setPres();return showCodex()}
+    await save();open(b.dataset.id);
+  };
+  $('#addc').onclick=async()=>{
+    await save();
+    const order=chapters.length?Math.max(...chapters.map(c=>c.order||0))+1:1;
+    db.collection(`novels/${novelId}/chapters`).add({title:'Chapter '+order,content:'',order,by:myId,updatedBy:myId,updatedAt:Date.now()})
+      .then(r=>{pending=r.id}).catch(fail);
+  };
+}
+function updNovel(){
+  if(!$('#nvt'))return;
+  const n=novels.find(x=>x.id===novelId);
+  $('#nvt').textContent=n?n.title:(novels.length?'Novel not found':'Loading…');
+  $('#nvs').textContent=n&&n.synopsis||'';
+  const tw=chapters.reduce((a,c)=>a+wc(c.content),0),g=n&&n.goal||0;
+  $('#gp').innerHTML=`<small>${tw.toLocaleString()} words${g?` of ${g.toLocaleString()}`:''}</small>`+(g?`<div class="prog"><i style="width:${Math.min(100,tw/g*100)}%"></i></div>`:'');
+  if(document.activeElement!==$('#gi'))$('#gi').value=g||'';
+  const q=($('#sq').value||'').trim().toLowerCase(),vis=q?chapters.filter(c=>((c.title||'')+' '+(c.content||'')).toLowerCase().includes(q)):chapters;
+  const cxm=q?notes.filter(x=>((x.name||'')+' '+(x.body||'')).toLowerCase().includes(q)).map(x=>`<button class="ch" data-cx="1"><b>${esc(x.name)}</b><span class="badge">${esc(x.kind)}</span><small>In the codex</small></button>`).join(''):'';
+  $('#chl').innerHTML=(vis.length?vis.map(c=>`<button class="ch${c.id===chapId?' on':''}" data-id="${c.id}"><b>${esc(c.title)}</b><span class="badge ${c.status||'Draft'}">${c.status||'Draft'}</span>${c.openMarks?`<span class="badge" title="Open comments">💬 ${c.openMarks}</span>`:''}<small>${wc(c.content)} words · edited by ${esc(nm(c.updatedBy))}</small>${live(c.id).map(p=>`<small style="color:var(--acc)">● ${esc(p.presence.name||'Someone')}${p.presence.typing?' is typing…':' is here'}</small>`).join('')}${q?snip(c,q):''}${c.tags?`<small>${esc(c.tags)}</small>`:''}</button>`).join(''):(q?'':'<p class="muted">No chapters yet.</p>'))+cxm+(q&&!vis.length&&!cxm?'<p class="muted">No matches.</p>':'');
+  if(pending&&chapters.some(c=>c.id===pending)){const p=pending;pending=null;open(p)}
+}
+function subC(){
+  unsubC=db.collection(`novels/${novelId}/chapters`).orderBy('order').onSnapshot(s=>{
+    chapters=s.docs.map(d=>({id:d.id,...d.data()}));
+    resolve(chapters.map(c=>c.updatedBy));if(tab==='files')showFiles();if(tab==='book')showBook();if(tab==='outline'&&!$('#ed').contains(document.activeElement))showOutline();
+    updNovel();
+    if(chapId){const c=chapters.find(x=>x.id===chapId);
+      if(c){sync(c);const w=$('#caw');if(w&&w.dataset.id===chapId)attFill(w,db.doc(`novels/${novelId}/chapters/${chapId}`),()=>chapters)}else if(!pending){chapId=null;dirty=false;$('#ed').innerHTML='<p class="muted">That chapter was deleted.</p>'}}
+  },fail);
+}
+
+function open(id){
+  const c=chapters.find(x=>x.id===id);if(!c)return;
+  chapId=id;tab='ed';dirty=false;armed=false;savedAt=c.updatedAt;
+  $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span><button id="dc">Delete</button></div>
+  <div class="warn" id="warn" hidden>Your co-author saved changes to this chapter. <button id="ld">Load their version</button> <small>(replaces your unsaved edits)</small></div>
+  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="tb" id="tb"><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
+  <div class="foot"><span id="wcn"></span><span id="lb" class="muted"></span></div>
+  <div class="cm" id="vh" hidden><h3>Version history</h3><button id="sv">Save a version now</button><div id="vl" style="margin-top:10px"></div></div>
+  <div class="cm"><h3>Inline comments</h3><div id="mkl"></div></div>
+  <div class="cm"><h3>Notes between co-authors</h3><div id="cml"></div><div class="row"><input id="cmi" placeholder="Leave a note about this chapter…"><button id="cmb">Send</button></div></div>`;
+  fill(c);
+  attFill($('#caw'),db.doc(`novels/${novelId}/chapters/${id}`),()=>chapters);
+  subMk(id);subCm(id);subVh(id);const edit=()=>{dirty=true;$('#st').textContent='Unsaved…';count();clearTimeout(timer);typ();timer=setTimeout(save,600)};
+  $('#ct').oninput=edit;$('#cb').oninput=edit;$('#sts').onchange=()=>{edit();save()};$('#fc').onclick=()=>document.body.classList.add('focus');wireTb();$('#ctg').oninput=edit;$('#cwt').oninput=edit;
+  $('#hs').onclick=()=>{$('#vh').hidden=!$('#vh').hidden};
+  $('#fr').onclick=()=>{const r=$('#frr');r.hidden=!r.hidden;if(!r.hidden)$('#fi').focus()};
+  $('#fi').oninput=()=>{const q=$('#fi').value;$('#fn').textContent=q?(($('#cb').value.match(new RegExp(rxEsc(q),'gi'))||[]).length+' found'):''};
+  $('#fa').onclick=replAll;
+  $('#dlf').onchange=e=>{const f=e.target.value;e.target.selectedIndex=0;if(!f)return;const t=$('#ct').value.trim()||'chapter';dlSave(slug(t)+'.'+f,chFile(f,t,$('#cb').value,$('#cb').html))};
+  $('#sv').onclick=()=>snap('Saved version').then(()=>toast('Version saved')).catch(fail);$('#up').onclick=()=>move(-1);$('#dn').onclick=()=>move(1);
+  $('#mw').onclick=()=>mode(false);$('#mr').onclick=()=>mode(true);
+  $('#ld').onclick=()=>{const x=chapters.find(y=>y.id===chapId);if(x){dirty=false;savedAt=x.updatedAt;fill(x);$('#warn').hidden=true}};
+  $('#dc').onclick=()=>{
+    const b=$('#dc');
+    if(!armed){armed=true;b.textContent='Sure? Click again';setTimeout(()=>{armed=false;b.textContent='Delete'},3000);return}
+    clearTimeout(timer);dirty=false;
+    db.doc(`novels/${novelId}/chapters/${chapId}`).delete().catch(fail);
+  };
+  updNovel();
+}
+function fill(c){
+  $('#ct').value=c.title||'';rte($('#cb'));if(c.html)$('#cb').html=c.html;else $('#cb').value=c.content||'';$('#ctg').value=c.tags||'';$('#cwt').value=c.target||'';$('#sts').value=c.status||'Draft';lastWc=wc(c.content);
+  $('#lb').textContent='Last edited by '+nm(c.updatedBy);$('#st').textContent='';count();
+}
+function count(){
+  const t=$('#cb').value,w=wc(t),dl=wc((t.match(/["“][^"”]*["”]/g)||[]).join(' '));
+  const tg=+$('#cwt').value||0;$('#cpg').innerHTML=tg?`<i style="width:${Math.min(100,w/tg*100)}%"></i>`:'';
+  $('#wcn').textContent=w+' words'+(w?` · ${Math.max(1,Math.round(w/230))} min read · ${Math.round(dl/w*100)}% dialogue`:'');
+}
+function mode(read){
+  if(read)$('#rd').innerHTML=($('#cb').value.trim()?$('#cb').html:'')||'<p class="muted">Nothing written yet.</p>';
+  $('#rd').hidden=!read;$('#cb').hidden=read;$('#tb').hidden=read;$('#ct').readOnly=read;
+  $('#mr').className=read?'on2':'';$('#mw').className=read?'':'on2';
+}
+function sync(c){
+  if(!$('#ct')||c.updatedAt===savedAt)return;
+  if(!dirty){savedAt=c.updatedAt;fill(c);$('#st').textContent='Updated by '+nm(c.updatedBy)}
+  else $('#warn').hidden=false;
+}
+async function save(){
+  if(!dirty||!chapId)return;
+  clearTimeout(timer);
+  const at=Date.now(),id=chapId;
+  const data={title:$('#ct').value.trim()||'Untitled chapter',content:$('#cb').value,html:$('#cb').html,tags:$('#ctg').value.trim(),target:+$('#cwt').value||0,status:$('#sts').value,updatedBy:myId,updatedAt:at};
+  savedAt=at;dirty=false;
+  try{await db.doc(`novels/${novelId}/chapters/${id}`).update(data);const dw=wc(data.content)-lastWc;lastWc=wc(data.content);if(dw>0){logWords(dw);if(sprintEnd)sprintW+=dw}const s=$('#st');if(s)s.textContent='Saved'}
+  catch(e){dirty=true;fail(e)}
+}
+
+const KINDS=['Character','Place','Lore','Plot'];
+const paras=t=>(t||'').split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+async function move(d){
+  await save();
+  const i=chapters.findIndex(c=>c.id===chapId),j=i+d;
+  if(i<0||j<0||j>=chapters.length)return;
+  const a=chapters[i],b=chapters[j];
+  try{await db.doc(`novels/${novelId}/chapters/${a.id}`).update({order:b.order});await db.doc(`novels/${novelId}/chapters/${b.id}`).update({order:a.order})}catch(e){fail(e)}
+}
+function subNotes(){
+  unsubN2=db.collection(`novels/${novelId}/notes`).orderBy('at').onSnapshot(s=>{
+    const old=notes.map(n=>n.id).join();
+    notes=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(tab==='files')showFiles();
+    if(tab==='codex'&&(old!==notes.map(n=>n.id).join()||!$('#ed').contains(document.activeElement)))showCodex();
+  },fail);
+}
+function showCodex(){
+  tab='codex';const shown=notes.filter(n=>cxf==='All'||n.kind===cxf);
+  $('#ed').innerHTML=`<h2>Codex</h2><p class="muted">Characters, places, lore and plot threads you both can see.</p><div class="tabs" id="cf" style="margin-bottom:10px">${['All',...KINDS].map(k=>`<button class="${k===cxf?'on2':''}" data-k="${k}">${k}</button>`).join('')}</div><div class="row"><select id="nk">${KINDS.map(k=>`<option>${k}</option>`).join('')}</select><input id="nn" placeholder="Name"><button class="pri" id="na">Add</button></div>`+
+  (shown.length?shown.map(n=>`<div class="note" data-id="${n.id}"><div class="nt"><b>${esc(n.name)}</b><span class="badge">${esc(n.kind)}</span><span style="flex:1"></span><button class="x">Delete</button></div><textarea placeholder="Description, abilities, secrets…">${esc(n.body)}</textarea><div class="at"></div></div>`).join(''):'<p class="muted">Nothing here yet. Add your first character or piece of lore.</p>');
+  $('#cf').onclick=e=>{const b=e.target.closest('button');if(b){cxf=b.dataset.k;showCodex()}};
+  if(cxf!=='All')$('#nk').value=cxf;
+  $('#na').onclick=()=>{
+    const name=$('#nn').value.trim();if(!name)return toast('Give it a name first.');
+    db.collection(`novels/${novelId}/notes`).add({kind:$('#nk').value,name,body:'',by:myId,at:Date.now()}).catch(fail);
+  };
+  $('#ed').querySelectorAll('.note').forEach(el=>{
+    const ref=db.doc(`novels/${novelId}/notes/${el.dataset.id}`),ta=el.querySelector('textarea'),x=el.querySelector('.x');let t;
+    ta.oninput=()=>{clearTimeout(t);t=setTimeout(()=>ref.update({body:ta.value}).catch(fail),1000)};
+    attFill(el,ref,()=>notes);
+    x.onclick=()=>{
+      if(x.dataset.a){ref.delete().catch(fail)}
+      else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}
+    };
+  });
+}
+function showBook(){
+  tab='book';
+  const list=chapters.filter(c=>drafts||c.status==='Published'),words=list.reduce((a,c)=>a+wc(c.content),0);
+  const n=novels.find(x=>x.id===novelId)||{};
+  const au=[...new Set(chapters.map(c=>c.by).concat(n.by).filter(Boolean))].map(u=>u===myId?myName:(names[u]||'')).filter(Boolean).join(' & ');
+  $('#ed').innerHTML=`<div class="bar"><b>${esc(n.title)}</b><span class="sp"></span><button id="fm">A−</button><button id="fp">A+</button><button id="dl">⬇ Text</button><button id="eb">⬇ Ebook</button><button id="bk">⬇ Backup</button><button id="zp">⬇ ZIP</button><label class="muted"><input type="checkbox" id="dr" style="width:auto"${drafts?' checked':''}> include drafts</label></div><div class="book" style="--fs:${fs}px"><div class="tp"><h1>${esc(n.title)}</h1>${n.synopsis?`<p class="muted">${esc(n.synopsis)}</p>`:''}<small>${au?'by '+esc(au):''}</small></div>`+
+  (list.length?list.map(c=>`<h2>${esc(c.title)}</h2>${c.tags?`<p class="muted" style="text-align:center"><small>${esc(c.tags)}</small></p>`:''}<div class="read">${rich(c)}</div>`).join(''):'<p class="muted">No published chapters yet. Set a chapter’s status to Published, or tick “include drafts”.</p>')+
+  `</div><div class="foot muted"><span>${list.length} chapters · ${words} words</span></div>`;
+  $('#zp').onclick=zipAll;$('#fm').onclick=()=>{fs=Math.max(14,fs-2);showBook()};$('#fp').onclick=()=>{fs=Math.min(30,fs+2);showBook()};
+  $('#dr').onchange=e=>{drafts=e.target.checked;showBook()};
+  $('#bk').onclick=async()=>{
+    const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');
+    const data=JSON.stringify({exportedAt:new Date().toISOString(),novel:n,chapters,codex:notes,timeline:evs,notes:memos,pages,spaces},null,2);
+    try{await dl.save({filename:(n.title||'novel').replace(/[^\w-]+/g,'-')+'-backup.json',data})}catch(e){if(!e||e.code!=='declined')fail(e)}
+  };
+  $('#eb').onclick=async()=>{
+    const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');
+    const css='body{font:18px/1.8 Georgia,serif;max-width:38em;margin:2em auto;padding:0 1em;color:#222}h1,h2{text-align:center}h2{margin-top:3em;page-break-before:always}p{margin:0 0 1em;text-indent:1.5em}.tp{text-align:center;margin:25vh 0}.tp p{text-indent:0}nav li{list-style:none;margin:.3em 0}hr{border:0;text-align:center;margin:1.5em 0}hr:before{content:"* * *";letter-spacing:.6em}';
+    const toc=list.map((c,i)=>`<li><a href="#c${i}">${esc(c.title)}</a></li>`).join('');
+    const html=`<!doctype html><html lang="en"><meta charset="utf-8"><title>${esc(n.title)}</title><style>${css}</style><body><div class="tp"><h1>${esc(n.title)}</h1><p><em>${esc(n.synopsis)}</em></p><p>${au?'by '+esc(au):''}</p></div><nav><h2>Contents</h2><ul>${toc}</ul></nav>`+list.map((c,i)=>`<h2 id="c${i}">${esc(c.title)}</h2>${rich(c)}`).join('')+'</body></html>';
+    try{await dl.save({filename:(n.title||'novel').replace(/[^\w-]+/g,'-')+'.html',data:html})}catch(e){if(!e||e.code!=='declined')fail(e)}
+  };
+  $('#dl').onclick=async()=>{
+    const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');
+    const md='# '+(n.title||'Novel')+'\n\n'+(n.synopsis?n.synopsis+'\n\n':'')+list.map(c=>'## '+c.title+'\n\n'+(c.content||'')).join('\n\n');
+    try{await dl.save({filename:((n.title||'novel').replace(/[^\w-]+/g,'-'))+'.txt',data:md})}catch(e){if(!e||e.code!=='declined')fail(e)}
+  };
+}
+let unsubCm=null,cms=[],room=null;
+function subCm(id){
+  if(unsubCm){unsubCm();unsubCm=null}cms=[];
+  const col=db.collection(`novels/${novelId}/chapters/${id}/comments`);
+  unsubCm=col.orderBy('at').onSnapshot(s=>{cms=s.docs.map(d=>({id:d.id,...d.data()}));resolve(cms.map(c=>c.by));showCm(id)},fail);
+  const send=()=>{const t=$('#cmi').value.trim();if(!t)return;$('#cmi').value='';col.add({text:t,by:myId,at:Date.now()}).catch(fail)};
+  $('#cmb').onclick=send;$('#cmi').onkeydown=e=>{if(e.key==='Enter')send()};
+  setPres();
+}
+function showCm(id){
+  const l=$('#cml');if(!l||id!==chapId)return;
+  l.innerHTML=cms.length?cms.map(c=>`<div class="note"><small>${esc(nm(c.by))} · ${new Date(c.at).toLocaleString()}</small><br>${esc(c.text)}${c.by===myId?` <button class="xc" data-id="${c.id}">✕</button>`:''}</div>`).join(''):'<p class="muted">No notes yet.</p>';
+  l.querySelectorAll('.xc').forEach(b=>b.onclick=()=>db.doc(`novels/${novelId}/chapters/${id}/comments/${b.dataset.id}`).delete().catch(fail));
+}
+function setPres(){
+  if(!room)return;
+  const c=chapters.find(x=>x.id===chapId);
+  const cb=$('#cb');room.presence({novel:novelId,name:myName,title:c?c.title:(tab==='spaces'?'Spaces':null),cid:c?c.id:null,typing:typingOn,words:c&&cb&&cb._r?wc(cb.value):0}).catch(()=>{});
+  showPeers();
+}
+function typ(){if(!typingOn){typingOn=true;setPres()}clearTimeout(tt);tt=setTimeout(()=>{typingOn=false;setPres()},2500)}
+setInterval(()=>{if(typingOn)setPres()},3000);
+function showPeers(){
+  const el=$('#pr');if(!el||!room)return;
+  const ps=room.peers().filter(p=>!p.isMe&&p.presence&&p.presence.novel===novelId);
+  const lv=$('#lv');if(lv)lv.innerHTML=ps.map(p=>`<small style="color:var(--acc)">● ${esc(p.presence.name||'Someone')} · ${p.presence.title?esc(p.presence.title):'browsing'}${p.presence.typing?' · typing…':''}${+p.presence.words?' · '+(+p.presence.words).toLocaleString()+' words':''}</small>`).join('<br>');
+  updNovel();
+  el.innerHTML=esc(myName)+ps.map(p=>` · <span style="color:var(--acc)">● ${esc(p.presence.name||'Someone')} ${p.presence.title?'is in “'+esc(p.presence.title)+'”':'is here'}</span>`).join('');
+}
+use('room').then(r=>{room=r;if(r){r.onPeers(showPeers);setPres()}});
+$('#xf').onclick=()=>document.body.classList.remove('focus');
+let unsubVh=null,vers=[],unsubSt=null,stats=[],lastWc=0,fs=18;
+let mks=[],unsubMk=null,cmRng=null,mkLate=0;
+let pages=[],spaces=[],unsubPg=null,unsubSp=null,spTab='drafts',typingOn=false,tt=null,stale=false;
+const live=cid=>room?room.peers().filter(p=>!p.isMe&&p.presence&&p.presence.novel===novelId&&p.presence.cid===cid):[];
+const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const snip=(c,q)=>{const t=c.content||'',i=t.toLowerCase().indexOf(q);return i<0?'':`<small>…${esc(t.slice(Math.max(0,i-30),i+60))}…</small>`};
+async function logWords(n){
+  if(!myId)return;
+  const ref=db.doc(`novels/${novelId}/stats/${dayKey()}_${myId}`);
+  try{const s=await ref.get();await ref.set({day:dayKey(),by:myId,words:(s.exists?s.data().words||0:0)+n})}catch(e){}
+}
+function subStats(){
+  unsubSt=db.collection(`novels/${novelId}/stats`).onSnapshot(s=>{stats=s.docs.map(d=>d.data());resolve(stats.map(x=>x.by));showStats()},()=>{});
+}
+function showStats(){
+  const el=$('#wd');if(!el)return;
+  const by={};
+  stats.forEach(x=>{(by[x.by]=by[x.by]||{})[x.day]=x.words});
+  const lines=Object.keys(by).map(u=>{
+    let streak=0;const d=new Date();
+    if(!(by[u][dayKey()]>0))d.setDate(d.getDate()-1);
+    while(by[u][dayKey(d)]>0){streak++;d.setDate(d.getDate()-1)}
+    return `${esc(nm(u))}: ${(by[u][dayKey()]||0).toLocaleString()} words today${streak?` · 🔥 ${streak}-day streak`:''}`;
+  });
+  el.innerHTML=lines.length?'<small>'+lines.join('<br>')+'</small>':'';
+}
+function snap(label){
+  return db.collection(`novels/${novelId}/chapters/${chapId}/versions`).add({title:$('#ct').value,content:$('#cb').value,html:$('#cb').html,label,by:myId,at:Date.now()});
+}
+function subVh(id){
+  if(unsubVh){unsubVh();unsubVh=null}vers=[];
+  unsubVh=db.collection(`novels/${novelId}/chapters/${id}/versions`).orderBy('at','desc').limit(20).onSnapshot(s=>{vers=s.docs.map(d=>({id:d.id,...d.data()}));resolve(vers.map(v=>v.by));showVh(id)},fail);
+}
+function showVh(id){
+  const l=$('#vl');if(!l||id!==chapId)return;
+  l.innerHTML=vers.length?vers.map(v=>`<div class="note"><small>${esc(v.label||'Version')} · ${esc(nm(v.by))} · ${new Date(v.at).toLocaleString()} · ${wc(v.content)} words</small> <button class="rv" data-id="${v.id}">Restore</button></div>`).join(''):'<p class="muted">No saved versions yet. Save one before a big rewrite.</p>';
+  l.querySelectorAll('.rv').forEach(b=>b.onclick=async()=>{
+    const v=vers.find(x=>x.id===b.dataset.id);if(!v)return;
+    try{if($('#cb').value!==v.content||(v.html&&$('#cb').html!==v.html))await snap('Before restore')}catch(e){return fail(e)}
+    $('#ct').value=v.title||'';if(v.html)$('#cb').html=v.html;else $('#cb').value=v.content||'';lastWc=wc(v.content);
+    dirty=true;$('#st').textContent='Restored, saving…';count();clearTimeout(timer);timer=setTimeout(save,300);
+  });
+}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save()}});
+let cxf='All';
+function showOutline(){
+  tab='outline';
+  $('#ed').innerHTML=`<h2>Outline</h2><p class="muted">One line per chapter: what happens and why it matters. Edits save automatically.</p>`+(chapters.length?chapters.map((c,i)=>`<div class="note" data-id="${c.id}"><div class="nt"><b>${i+1}. ${esc(c.title)}</b><span class="badge ${c.status||'Draft'}">${c.status||'Draft'}</span><span style="flex:1"></span><small>${wc(c.content)} words</small><button class="go">Open</button></div><textarea placeholder="What happens in this chapter?">${esc(c.summary)}</textarea></div>`).join(''):'<p class="muted">Add a chapter to start your outline.</p>');
+  $('#ed').querySelectorAll('.note').forEach(el=>{
+    const ref=db.doc(`novels/${novelId}/chapters/${el.dataset.id}`),ta=el.querySelector('textarea');let t;
+    ta.oninput=()=>{clearTimeout(t);t=setTimeout(()=>ref.update({summary:ta.value}).catch(fail),1000)};
+    el.querySelector('.go').onclick=()=>open(el.dataset.id);
+  });
+}
+{
+  let m='auto';try{m=localStorage.getItem('ink-theme')||'auto'}catch(e){}
+  const ap=()=>{if(m==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=m};
+  ap();
+  $('#tg').onclick=()=>{m=m==='auto'?'dark':m==='dark'?'light':'auto';ap();toast('Theme: '+m);try{localStorage.setItem('ink-theme',m)}catch(e){}};
+}
+const FONTS=['Georgia','Times New Roman','Garamond','Arial','Verdana','Trebuchet MS','Courier New','Comic Sans MS'];
+const GEN={'Georgia':'serif','Times New Roman':'serif','Garamond':'serif','Arial':'sans-serif','Verdana':'sans-serif','Trebuchet MS':'sans-serif','Courier New':'monospace','Comic Sans MS':'cursive'};
+const OKT={B:1,STRONG:1,I:1,EM:1,U:1,P:1,BR:1,DIV:1,SPAN:1,HR:1};
+const DROP=/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|LINK|META|NOSCRIPT|TEMPLATE)$/;
+// Whitelist sanitizer: only basic formatting tags survive; spans keep only a known font and a sane size.
+function clean(h,keep){
+  const d=new DOMParser().parseFromString('<body>'+(h||'')+'</body>','text/html').body;
+  (function walk(n){
+    [...n.childNodes].forEach(c=>{
+      if(c.nodeType===3)return;
+      if(c.nodeType!==1||DROP.test(c.tagName)){c.remove();return}
+      if(!OKT[c.tagName]){walk(c);c.replaceWith(...c.childNodes);return}
+      const st=c.getAttribute('style')||'',dc=c.getAttribute('data-cm');
+      [...c.attributes].forEach(a=>c.removeAttribute(a.name));
+      if(c.tagName==='P'||c.tagName==='DIV'){const al=/text-align:\s*(left|center|right|justify)/i.exec(st);if(al)c.setAttribute('style','text-align:'+al[1].toLowerCase())}
+      if(c.tagName==='SPAN'){
+        const f=/font-family:\s*([^;]+)/i.exec(st),s=/font-size:\s*(\d+)px/i.exec(st);let o='';
+        if(f){const fn=f[1].split(',')[0].replace(/["']/g,'').trim();if(FONTS.includes(fn))o+=`font-family:'${fn}',${GEN[fn]};`}
+        if(s&&+s[1]>=10&&+s[1]<=60)o+=`font-size:${s[1]}px;`;
+        const bg=/background-color:\s*(#[0-9a-f]{6}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))/i.exec(st);if(bg&&bg[1].replace(/\s/g,'')!=='rgb(3,7,11)')o+=`background-color:${bg[1]};`;
+        const k=/(?:^|;)\s*color:\s*(#[0-9a-f]{6}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))/i.exec(st);if(k)o+=`color:${k[1]};`;
+        if(o)c.setAttribute('style',o);if(keep&&dc&&/^[\w-]{1,64}$/.test(dc))c.setAttribute('data-cm',dc);
+      }
+      walk(c);
+    });
+  })(d);
+  return d.innerHTML;
+}
+const rich=c=>c.html?clean(c.html):paras(c.content);
+function plain(cb){
+  const c=cb.cloneNode(true);
+  c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));
+  c.querySelectorAll('hr').forEach(h=>h.replaceWith('\n***\n'));
+  c.querySelectorAll('p,div').forEach(e=>e.append('\n'));
+  return c.textContent.replace(/\n{2,}/g,'\n').trim();
+}
+let rng=null;
+function rte(cb){
+  if(cb._r)return;cb._r=1;rng=null;
+  Object.defineProperty(cb,'value',{get:()=>plain(cb),set:v=>{cb.innerHTML=paras(v)}});
+  Object.defineProperty(cb,'html',{get:()=>clean(cb.innerHTML,1),set:h=>{cb.innerHTML=clean(h,1)}});
+  cb.onpaste=e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain')||'')};
+  cb.ondrop=e=>e.preventDefault();
+  try{document.execCommand('styleWithCSS',false,false);document.execCommand('defaultParagraphSeparator',false,'p')}catch(e){}
+}
+document.addEventListener('selectionchange',()=>{const e=$('#cb'),s=getSelection();if(e&&s.rangeCount&&e.contains(s.anchorNode))rng=s.getRangeAt(0).cloneRange()});
+function fmt(cmd,val,px){
+  const cb=$('#cb');cb.focus();
+  if(rng){const s=getSelection();s.removeAllRanges();s.addRange(rng)}
+  document.execCommand(cmd,false,val||null);
+  cb.querySelectorAll('font').forEach(f=>{
+    const s=document.createElement('span');
+    if(f.face)s.style.fontFamily=f.face;if(f.color)s.style.color=f.color;
+    if(px&&f.getAttribute('size'))s.style.fontSize=px+'px';
+    s.append(...f.childNodes);f.replaceWith(s);
+  });
+  cb.dispatchEvent(new Event('input'));
+}
+function wireTb(){
+  const tb=$('#tb');
+  tb.onmousedown=e=>{if(e.target.closest('button'))e.preventDefault()};
+  tb.onclick=e=>{const b=e.target.closest('button[data-c]');if(b)b.dataset.c==='hr'?fmt('insertHTML','<hr><p><br></p>'):fmt(b.dataset.c)};
+  $('#ff').onchange=e=>{if(e.target.value)fmt('fontName',e.target.value);e.target.selectedIndex=0};
+  $('#fz').onchange=e=>{if(e.target.value)fmt('fontSize','7',e.target.value);e.target.selectedIndex=0};
+  $('#fk').onchange=e=>{if(e.target.value)fmt('foreColor',e.target.value);e.target.selectedIndex=0};
+  $('#hl').onchange=e=>{const v=e.target.value;e.target.selectedIndex=0;if(v)fmt('hiliteColor',v==='none'?'transparent':v)};
+  $('#hp').onchange=e=>{const v=e.target.value;e.target.selectedIndex=0;if(v)hlP(v==='none'?'transparent':v)};
+  $('#cmt').onclick=startCm;$('#cmx').onclick=()=>{$('#cmr').hidden=true};$('#cmo').onclick=postCm;
+  $('#cb').addEventListener('click',e=>{const s=e.target.closest&&e.target.closest('[data-cm]');if(!s)return;const n=[...document.querySelectorAll('#mkl .note')].find(x=>x.dataset.mk===s.dataset.cm);if(n){n.scrollIntoView({block:'center',behavior:'smooth'});n.style.outline='2px solid var(--acc)';setTimeout(()=>n.style.outline='',1500)}});
+}
+const COLORS=[['Red','#c0392b'],['Orange','#d35400'],['Gold','#b7950b'],['Green','#27ae60'],['Blue','#2980b9'],['Purple','#8e44ad'],['Gray','#7f8c8d']];
+const PROMPTS=['A character finds a letter addressed to them in their own handwriting, dated ten years from now.','Two rivals are forced to share a secret neither of them wants to keep.','Write the scene where the hero’s greatest strength becomes a liability.','Someone returns home and nothing has changed except one small thing. What is it?','A promise made in chapter one is broken. Who pays for it?','Describe the dawn of your world from the point of view of someone who has never seen it.','Show the villain having a quiet, ordinary morning.','Two friends disagree about what really happened, and both are right.','A rule of your magic system fails exactly once. Why?','End a chapter on a door that is already open.','Give a side character a moment where they steal the scene.','Put the most important conversation of the book in the middle of something mundane, like cooking or travelling.'];
+let evs=[],unsubEv=null;
+function subEv(){
+  unsubEv=db.collection(`novels/${novelId}/events`).orderBy('pos').onSnapshot(s=>{
+    const old=evs.map(e=>e.id).join();
+    evs=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(tab==='timeline'&&(old!==evs.map(e=>e.id).join()||!$('#ed').contains(document.activeElement)))showTimeline();
+  },()=>{});
+}
+function showTimeline(){
+  tab='timeline';
+  $('#ed').innerHTML=`<h2>Timeline</h2><p class="muted">Story events in order, so you both keep the plot straight.</p><div class="row"><input id="tw" placeholder="When (e.g. Year 3, Day 12)" style="flex:0 1 220px"><input id="tt" placeholder="What happens"><button class="pri" id="ta">Add event</button></div>`+(evs.length?evs.map(e=>`<div class="note" data-id="${e.id}"><div class="nt"><span class="badge">${esc(e.when||'—')}</span><b>${esc(e.title)}</b><span style="flex:1"></span><button class="u">↑</button><button class="d">↓</button><button class="x">Delete</button></div><textarea placeholder="Details…">${esc(e.body)}</textarea></div>`).join(''):'<p class="muted">No events yet. Add the first one above.</p>');
+  $('#ta').onclick=()=>{
+    const title=$('#tt').value.trim();if(!title)return toast('Describe the event first.');
+    db.collection(`novels/${novelId}/events`).add({when:$('#tw').value.trim(),title,body:'',pos:evs.length?Math.max(...evs.map(e=>e.pos||0))+1:1,by:myId}).catch(fail);
+  };
+  $('#ed').querySelectorAll('.note').forEach((el,i)=>{
+    const ref=db.doc(`novels/${novelId}/events/${el.dataset.id}`),ta=el.querySelector('textarea'),x=el.querySelector('.x');let t;
+    ta.oninput=()=>{clearTimeout(t);t=setTimeout(()=>ref.update({body:ta.value}).catch(fail),1000)};
+    x.onclick=()=>{if(x.dataset.a){ref.delete().catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
+    [['.u',-1],['.d',1]].forEach(([q,d])=>el.querySelector(q).onclick=()=>{
+      const a=evs[i],b=evs[i+d];if(!b)return;
+      db.doc(`novels/${novelId}/events/${a.id}`).update({pos:b.pos}).then(()=>db.doc(`novels/${novelId}/events/${b.id}`).update({pos:a.pos})).catch(fail);
+    });
+  });
+}
+let memos=[],pmemos=[],unsubMm=null,unsubPm=null,puid=null,pmOk=true,memoTab='shared';
+function memoUpd(o,list){
+  if(tab==='memos'&&(o!==list.map(m=>m.id).join()||!$('#ed').contains(document.activeElement)))showMemos();
+}
+async function subMemos(){
+  const id=novelId;
+  unsubMm=db.collection(`novels/${id}/memos`).onSnapshot(s=>{
+    const o=memos.map(m=>m.id).join();
+    memos=s.docs.map(d=>({id:d.id,...d.data()}));resolve(memos.map(m=>m.by));memoUpd(o,memos);
+  },()=>{});
+  try{puid=await user.id()}catch(e){}
+  puid=puid||myId;
+  if(!puid||id!==novelId)return;
+  const u=db.collection('data/users/'+puid).onSnapshot(s=>{
+    const o=pmemos.map(m=>m.id).join();
+    pmemos=s.docs.map(d=>({id:d.id,...d.data()})).filter(m=>m.novel===id);memoUpd(o,pmemos);
+  },()=>{pmOk=false;if(tab==='memos'&&memoTab==='private')showMemos()});
+  if(id!==novelId)u();else unsubPm=u;
+  if(tab==='memos'&&memoTab==='private')showMemos();
+}
+function showMemos(){
+  tab='memos';
+  const priv=memoTab==='private',list=(priv?pmemos:memos).slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.at||0)-(a.at||0));
+  const head=`<h2>Notes</h2><div class="tabs" id="mt"><button data-s="shared" class="${priv?'':'on2'}">Shared with co-author</button><button data-s="private" class="${priv?'on2':''}">Private (only you)</button></div><p class="muted">${priv?'Only you can see these. Good for secret plans and spoilers.':'You and your co-author both see these: ideas, to-dos, research.'}</p>`;
+  const body=priv&&!pmOk?'<p class="muted">Private notes aren’t available right now.</p>':priv&&!puid?'<p class="muted">Loading…</p>':`<div class="row"><input id="mti" placeholder="Note title"><button class="pri" id="mad">Add note</button></div>`+(list.length?list.map(m=>`<div class="note" data-id="${m.id}"><div class="nt"><button class="pin" title="Pin to top">${m.pinned?'★':'☆'}</button><input class="mtl" value="${esc(m.title)}" style="font-weight:700"><button class="x">Delete</button></div><textarea placeholder="Write your note…">${esc(m.body)}</textarea><small>${priv?'':esc(nm(m.by))+' · '}${new Date(m.at||0).toLocaleDateString()}</small></div>`).join(''):'<p class="muted">No notes yet. Add the first one above.</p>');
+  $('#ed').innerHTML=head+body;
+  $('#mt').onclick=e=>{const b=e.target.closest('button');if(b){memoTab=b.dataset.s;showMemos()}};
+  const col=()=>priv?db.collection('data/users/'+puid):db.collection(`novels/${novelId}/memos`);
+  const dref=id=>priv?db.doc(`data/users/${puid}/${id}`):db.doc(`novels/${novelId}/memos/${id}`);
+  const add=$('#mad');
+  if(add)add.onclick=()=>{
+    const title=$('#mti').value.trim();if(!title)return toast('Give the note a title first.');
+    col().add(priv?{novel:novelId,title,body:'',pinned:false,at:Date.now()}:{title,body:'',pinned:false,by:myId,at:Date.now()}).catch(fail);
+  };
+  $('#ed').querySelectorAll('.note').forEach(el=>{
+    const ref=dref(el.dataset.id),ta=el.querySelector('textarea'),ti=el.querySelector('.mtl'),x=el.querySelector('.x');let t;
+    const sv=()=>{clearTimeout(t);t=setTimeout(()=>ref.update({title:ti.value,body:ta.value}).catch(fail),1000)};
+    ta.oninput=sv;ti.oninput=sv;
+    el.querySelector('.pin').onclick=()=>{const m=list.find(z=>z.id===el.dataset.id);ref.update({pinned:!(m&&m.pinned)}).catch(fail)};
+    x.onclick=()=>{if(x.dataset.a){ref.delete().catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
+  });
+}
+const rxEsc=q=>q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function replAll(){
+  const q=$('#fi').value,r=$('#fo').value,cb=$('#cb');if(!q)return;
+  const rx=new RegExp(rxEsc(q),'gi'),w=document.createTreeWalker(cb,NodeFilter.SHOW_TEXT),a=[];let n=0;
+  while(w.nextNode())a.push(w.currentNode);
+  a.forEach(t=>{const v=t.nodeValue.replace(rx,()=>{n++;return r});if(v!==t.nodeValue)t.nodeValue=v});
+  if(n)cb.dispatchEvent(new Event('input'));
+  toast(n?'Replaced '+n+'.':'No matches.');
+}
+let asts=null;use('assets').then(a=>{asts=a});
+const fsz=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+const chip=(a,i)=>{if(!/^[0-9a-f]{32}$/.test((a&&a.id)||''))return'';const u='/_blob/'+a.id;return '<span class="atc">'+(/^image\//.test(a.type||'')?'<img src="'+u+'" alt="">':'📄')+'<a href="'+u+'" target="_blank" rel="noopener">'+esc(a.name)+'</a><span class="muted">'+fsz(+a.size||0)+'</span><button class="pin ar" data-i="'+i+'" title="Remove">✕</button></span>'};
+const afail=e=>toast(e&&e.code==='unsupported_type'?'That file type isn’t supported. Try images, PDF, video, csv, md, json or txt.':e&&e.code==='too_large'?'That file is too large (20 MB max).':e&&e.code==='quota_or_state'?'Storage is full for this novel.':'Upload failed: '+((e&&e.message)||e));
+function attFill(el,ref,list){
+  const id=el.dataset.id,get=()=>((list().find(z=>z.id===id)||{}).files)||[],box=el.querySelector('.at'),fl=get(),key=JSON.stringify(fl)+(asts?1:0);
+  if(!box||box.dataset.k===key)return;box.dataset.k=key;
+  box.innerHTML=fl.map(chip).join('')+(asts?'<label class="atb"><input type="file" class="af" multiple hidden>📎 Attach file</label>':'');
+  const inp=box.querySelector('.af');
+  if(inp)inp.onchange=async()=>{const fs0=[...inp.files];inp.value='';for(const f of fs0){try{const r=await asts.upload(f);await ref.update({files:[...get(),{id:r.id,name:f.name.slice(0,120),type:f.type||'',size:f.size}]})}catch(e){afail(e)}}};
+  box.querySelectorAll('.ar').forEach(b=>b.onclick=()=>{const cur=get(),a=cur[+b.dataset.i];if(!a)return;ref.update({files:cur.filter((_,j)=>j!==+b.dataset.i)}).then(()=>asts&&asts.delete(a.id).catch(()=>{})).catch(fail)});
+}
+let flt='all';
+function allFiles(){
+  const out=[];
+  chapters.forEach(c=>(c.files||[]).forEach(a=>out.push({a,src:'Chapter: '+(c.title||'Untitled'),go:()=>open(c.id)})));
+  notes.forEach(n=>(n.files||[]).forEach(a=>out.push({a,src:'Codex: '+(n.name||''),go:()=>showCodex()})));
+  pages.forEach(p=>(p.files||[]).forEach(a=>{const sp=spList().find(x=>x[0]===p.space);out.push({a,src:'Spaces › '+(sp?sp[2]:'')+': '+(p.title||''),go:()=>{spTab=p.space;showSpaces()}})}));
+  return out.filter(o=>/^[0-9a-f]{32}$/.test((o.a&&o.a.id)||''));
+}
+function showFiles(){
+  tab='files';
+  const all=allFiles(),img=o=>/^image\//.test(o.a.type||''),list=flt==='all'?all:flt==='img'?all.filter(img):all.filter(o=>!img(o));
+  const total=all.reduce((s,o)=>s+(+o.a.size||0),0);
+  $('#ed').innerHTML=`<h2>Files</h2><p class="muted">Everything attached to chapters, the codex and spaces. ${all.length} file${all.length===1?'':'s'} · ${fsz(total)}</p><div class="tabs" id="ff2">${[['all','All'],['img','Images'],['oth','Documents']].map(([k,l])=>`<button data-k="${k}" class="${k===flt?'on2':''}">${l}</button>`).join('')}</div><div class="grid" style="margin-top:12px">`+(list.length?list.map((o,i)=>`<div class="card"><div style="height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden">${img(o)?`<img src="/_blob/${o.a.id}" alt="" style="max-width:100%;max-height:90px;border-radius:6px">`:'<span style="font-size:36px">📄</span>'}</div><p style="margin:.5em 0 0;overflow-wrap:anywhere"><a href="/_blob/${o.a.id}" target="_blank" rel="noopener" style="text-decoration:underline">${esc(o.a.name)}</a></p><small>${fsz(+o.a.size||0)} · ${esc(o.src)}</small><br><button class="go" data-i="${i}" style="margin-top:6px">Open source</button></div>`).join(''):'<p class="muted">No files yet. Use 📎 Attach file on a chapter, codex entry or page.</p>')+'</div>';
+  $('#ff2').onclick=e=>{const b=e.target.closest('button');if(b){flt=b.dataset.k;showFiles()}};
+  $('#ed').querySelectorAll('.go').forEach(b=>b.onclick=()=>list[+b.dataset.i].go());
+}
+document.head.appendChild(Object.assign(document.createElement('style'),{id:'mkst'}));
+const HLO='<option value="#fff2a8">Yellow</option><option value="#c8f0c8">Green</option><option value="#ffd0e0">Pink</option><option value="#cfe6ff">Blue</option><option value="none">Remove</option>';
+function hlP(v){
+  const cb=$('#cb'),blk=n=>{while(n&&n!==cb&&!/^(P|DIV)$/.test(n.nodeName))n=n.parentNode;return n&&n!==cb?n:null};
+  if(!rng||!cb.contains(rng.commonAncestorContainer))return toast('Click inside a paragraph first.');
+  const a=blk(rng.startContainer),b=blk(rng.endContainer);if(!a||!b)return toast('Click inside a paragraph first.');
+  const r=document.createRange();r.setStart(a,0);r.setEnd(b,b.childNodes.length);rng=r;fmt('hiliteColor',v);
+}
+function startCm(){
+  const cb=$('#cb');
+  if(!rng||rng.collapsed||!cb.contains(rng.commonAncestorContainer))return toast('Select some text first, then click 💬.');
+  cmRng=rng.cloneRange();$('#cmr').hidden=false;$('#cmv').focus();
+}
+async function postCm(){
+  const t=$('#cmv').value.trim(),cb=$('#cb');if(!t||!cmRng)return toast('Write your comment first.');
+  const quote=cmRng.toString().replace(/\s+/g,' ').trim().slice(0,200),cid=chapId;if(!quote)return toast('Select some text first.');
+  try{
+    const r=await db.collection(`novels/${novelId}/chapters/${cid}/marks`).add({quote,text:t,by:myId,at:Date.now(),resolved:false});
+    if(cid!==chapId)return;
+    rng=cmRng;fmt('hiliteColor','#03070b');
+    cb.querySelectorAll('span').forEach(s=>{if(s.style.backgroundColor==='rgb(3, 7, 11)'){s.style.backgroundColor='';if(!s.getAttribute('style'))s.removeAttribute('style');s.dataset.cm=r.id}});
+    cb.dispatchEvent(new Event('input'));$('#cmv').value='';$('#cmr').hidden=true;cmRng=null;
+  }catch(e){fail(e)}
+}
+function subMk(id){
+  if(unsubMk){unsubMk();unsubMk=null}mks=[];
+  unsubMk=db.collection(`novels/${novelId}/chapters/${id}/marks`).orderBy('at').onSnapshot(s=>{mks=s.docs.map(d=>({id:d.id,...d.data()}));resolve(mks.map(m=>m.by));showMk(id);const n=mks.filter(m=>!m.resolved).length,c=chapters.find(x=>x.id===id);if(c&&(c.openMarks||0)!==n)db.doc(`novels/${novelId}/chapters/${id}`).update({openMarks:n}).catch(()=>{})},fail);
+}
+const mkSpan=i=>[...$('#cb').querySelectorAll('[data-cm]')].find(s=>s.dataset.cm===i);
+function unwrapMk(i){
+  const cb=$('#cb');if(!cb)return;let c=0;
+  cb.querySelectorAll('[data-cm]').forEach(s=>{if(s.dataset.cm===i){c++;if(s.getAttribute('style'))s.removeAttribute('data-cm');else s.replaceWith(...s.childNodes)}});
+  if(c)cb.dispatchEvent(new Event('input'));
+}
+function showMk(id){
+  const live=mks.filter(m=>!m.resolved&&/^[\w-]{1,64}$/.test(m.id)).map(m=>`[data-cm="${m.id}"]`);
+  $('#mkst').textContent=live.length?live.join(',')+'{background:rgba(255,196,0,.38);border-bottom:2px solid #e0a800;cursor:pointer}':'';
+  const l=$('#mkl');if(!l||id!==chapId)return;
+  l.onfocusout=()=>setTimeout(()=>{if(mkLate&&!l.contains(document.activeElement)){mkLate=0;showMk(chapId)}},50);
+  if(l.contains(document.activeElement)&&document.activeElement.tagName==='INPUT'){mkLate=1;return}
+  const ms=mks.slice().sort((a,b)=>(a.resolved?1:0)-(b.resolved?1:0)||(a.at||0)-(b.at||0));
+  l.innerHTML=ms.length?ms.map(m=>`<div class="note" data-mk="${esc(m.id)}" style="${m.resolved?'opacity:.55':''}"><small>${esc(nm(m.by))} · ${new Date(m.at||0).toLocaleString()}${m.resolved?' · resolved':''}</small><br><i class="muted">“${esc(m.quote)}”</i><br>${esc(m.text)}${(m.replies||[]).map((r,i)=>`<div style="margin:6px 0 0 12px;border-left:2px solid var(--line);padding-left:8px"><small>${esc(nm(r.by))} · ${new Date(r.at||0).toLocaleString()}</small>${r.by===myId?` <button class="pin rd" data-i="${i}" title="Delete reply">✕</button>`:''}<br>${esc(r.text)}</div>`).join('')}${m.resolved?'':'<div class="row" style="margin:8px 0 0"><input class="rpi" placeholder="Reply…"><button class="rpb">Reply</button></div>'}<div class="nt" style="margin-top:6px">${m.resolved?'':'<button class="mj">Jump</button><button class="mr">Resolve</button>'}${m.by===myId?'<button class="md">Delete</button>':''}</div></div>`).join(''):'<p class="muted">No inline comments yet. Select text and click 💬.</p>';
+  l.querySelectorAll('.note').forEach(el=>{
+    const m=mks.find(z=>z.id===el.dataset.mk);if(!m)return;
+    const ref=db.doc(`novels/${novelId}/chapters/${id}/marks/${m.id}`),j=el.querySelector('.mj'),r=el.querySelector('.mr'),d=el.querySelector('.md');
+    if(j)j.onclick=()=>{const s=mkSpan(m.id);if(s){s.scrollIntoView({block:'center',behavior:'smooth'});s.style.outline='2px solid var(--acc)';setTimeout(()=>s.style.outline='',1500)}else toast('That text was edited or removed.')};
+    if(r)r.onclick=()=>{unwrapMk(m.id);ref.update({resolved:true}).catch(fail)};
+    if(d)d.onclick=()=>{unwrapMk(m.id);ref.delete().catch(fail)};
+    const ri=el.querySelector('.rpi'),rb=el.querySelector('.rpb');
+    const sr=()=>{const t=ri.value.trim();if(!t)return;const cur=(mks.find(z=>z.id===m.id)||{}).replies||[];ri.value='';ref.update({replies:[...cur,{by:myId,at:Date.now(),text:t.slice(0,2000)}]}).catch(fail)};
+    if(rb){rb.onclick=sr;ri.onkeydown=e=>{if(e.key==='Enter')sr()}}
+    el.querySelectorAll('.rd').forEach(b=>b.onclick=()=>{const cur=(mks.find(z=>z.id===m.id)||{}).replies||[],i=+b.dataset.i;if(!cur[i]||cur[i].by!==myId)return;ref.update({replies:cur.filter((_,j)=>j!==i)}).catch(fail)});
+  });
+}
+const slug=s=>String(s||'untitled').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)||'untitled';
+const dlSave=async(filename,data)=>{const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');try{await dl.save({filename,data})}catch(e){if(!e||e.code!=='declined')fail(e)}};
+function chFile(fmt,title,text,html){
+  if(fmt==='html')return `<!doctype html><html lang="en"><meta charset="utf-8"><title>${esc(title)}</title><style>body{font:18px/1.8 Georgia,serif;max-width:38em;margin:2em auto;padding:0 1em;color:#222}h1{text-align:center}p{margin:0 0 1em;text-indent:1.5em}hr{border:0;text-align:center}hr:before{content:"* * *";letter-spacing:.6em}</style><body><h1>${esc(title)}</h1>${html||paras(text)}</body></html>`;
+  return fmt==='md'?'# '+title+'\n\n'+text:title+'\n\n'+text;
+}
+async function zipAll(){
+  if(!window.JSZip)return toast('ZIP isn’t available here. Use Backup instead.');
+  const n=novels.find(x=>x.id===novelId)||{},z=new JSZip(),pad=i=>String(i+1).padStart(2,'0'),f=z.folder('chapters');
+  chapters.forEach((c,i)=>f.file(pad(i)+'-'+slug(c.title)+'.md',chFile('md',c.title||'Untitled',c.content||'')));
+  if(notes.length)z.file('codex.md',notes.map(x=>'## '+x.name+' ('+x.kind+')\n\n'+(x.body||'')).join('\n\n'));
+  if(evs.length)z.file('timeline.md',evs.map(e=>'- **'+(e.when||'—')+'** '+e.title+(e.body?'\n  '+e.body.replace(/\n/g,'\n  '):'')).join('\n'));
+  if(memos.length)z.file('notes.md',memos.map(m=>'## '+m.title+'\n\n'+(m.body||'')).join('\n\n'));
+  spList().forEach(([k,,sn])=>{const l=pages.filter(p=>p.space===k);if(l.length){const d=z.folder('spaces/'+slug(sn));l.forEach((p,i)=>d.file(pad(i)+'-'+slug(p.title)+'.md','# '+p.title+'\n\n'+(p.body||'')))}});
+  try{dlSave(slug(n.title||'novel')+'.zip',await z.generateAsync({type:'blob'}))}catch(e){fail(e)}
+}
+let sprintEnd=0,sprintW=0;
+function sprintUI(){
+  const el=$('#sp');if(!el)return;
+  if(!sprintEnd){if(el.dataset.s==='i')return;el.dataset.s='i';el.innerHTML='<small>Sprint:</small> <button data-m="10">10m</button> <button data-m="25">25m</button>';return}
+  el.dataset.s='a';const l=Math.max(0,Math.round((sprintEnd-Date.now())/1000));
+  el.innerHTML='<small>⏱ '+Math.floor(l/60)+':'+String(l%60).padStart(2,'0')+' · '+sprintW+' words</small> <button data-m="0">Stop</button>';
+}
+setInterval(()=>{if(sprintEnd&&Date.now()>=sprintEnd){toast('Sprint over! You wrote '+sprintW+' words.');sprintEnd=0}sprintUI()},1000);
+const BASE=[['drafts','📝','Drafts'],['ideas','💡','Ideas'],['themes','🎭','Themes'],['characters','👤','Characters']];
+const spList=()=>BASE.concat(spaces.map(x=>[x.id,'📁',x.name]));
+const sph=l=>l.length+' page'+(l.length===1?'':'s')+' · '+l.reduce((a,p)=>a+wc(p.body),0).toLocaleString()+' words';
+const pgMeta=p=>'edited by '+nm(p.updatedBy||p.by)+' · '+new Date(p.updatedAt||p.at||0).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+wc(p.body)+' words';
+const inSp=()=>pages.filter(p=>p.space===spTab).sort((a,b)=>(a.at||0)-(b.at||0));
+function subSpaces(){
+  const id=novelId;
+  unsubSp=db.collection(`novels/${id}/spaces`).orderBy('at').onSnapshot(s=>{spaces=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='spaces'&&!$('#ed').contains(document.activeElement))showSpaces()},()=>{});
+  unsubPg=db.collection(`novels/${id}/pages`).onSnapshot(s=>{
+    pages=s.docs.map(d=>({id:d.id,...d.data()}));resolve(pages.map(p=>p.updatedBy));
+    if(tab==='files')showFiles();if(tab!=='spaces')return;
+    if(!$('#ed').contains(document.activeElement))showSpaces();else pgSync();
+  },()=>{});
+}
+function pgSync(){
+  const cur=inSp(),ed=$('#ed'),have=[...ed.querySelectorAll('.note')].map(e=>e.dataset.id);
+  if(cur.map(p=>p.id).join()!==have.join()){stale=true;return}
+  $('#sph').textContent=sph(cur);
+  ed.querySelectorAll('.note').forEach(el=>{
+    const p=cur.find(x=>x.id===el.dataset.id),ta=el.querySelector('textarea'),ti=el.querySelector('.mtl');if(!p)return;
+    if(document.activeElement!==ta&&ta.value!==(p.body||''))ta.value=p.body||'';
+    if(document.activeElement!==ti&&ti.value!==(p.title||''))ti.value=p.title||'';
+    el.querySelector('small').textContent=pgMeta(p);
+    attFill(el,db.doc(`novels/${novelId}/pages/${el.dataset.id}`),()=>pages);
+  });
+}
+function showSpaces(){
+  tab='spaces';stale=false;
+  const sl=spList();if(!sl.some(x=>x[0]===spTab))spTab='drafts';
+  const cur=inSp();
+  $('#ed').innerHTML=`<h2>Spaces</h2><p class="muted">Separate rooms for drafts, ideas, themes and characters. You and your co-author see each other’s edits live.</p><div class="tabs" id="spt">${sl.map(x=>`<button data-s="${esc(x[0])}" class="${x[0]===spTab?'on2':''}">${x[1]} ${esc(x[2])}</button>`).join('')}</div><div class="row"><input id="snn" placeholder="New space name (e.g. Worldbuilding)"><button id="sna">Create space</button></div><p class="muted" id="sph">${sph(cur)}</p><div class="row"><input id="pgt" placeholder="New page title"><button class="pri" id="pga">Add page</button></div>`+(cur.length?cur.map(p=>`<div class="note" data-id="${p.id}"><div class="nt"><input class="mtl" value="${esc(p.title)}" style="font-weight:700"><button class="pd" title="Download this page">⬇</button><button class="pm" title="Copy this page into a new chapter">→ Chapter</button><button class="x">Delete</button></div><textarea placeholder="Write here…">${esc(p.body)}</textarea><div class="at"></div><small>${pgMeta(p)}</small></div>`).join(''):'<p class="muted">Nothing in this space yet. Add a page above.</p>');
+  $('#spt').onclick=e=>{const b=e.target.closest('button');if(b){spTab=b.dataset.s;showSpaces()}};
+  $('#sna').onclick=()=>{const name=$('#snn').value.trim();if(!name)return toast('Name the space first.');db.collection(`novels/${novelId}/spaces`).add({name,by:myId,at:Date.now()}).then(r=>{spTab=r.id;showSpaces()}).catch(fail)};
+  $('#pga').onclick=()=>{const title=$('#pgt').value.trim();if(!title)return toast('Give the page a title first.');const n=Date.now();db.collection(`novels/${novelId}/pages`).add({space:spTab,title,body:'',by:myId,updatedBy:myId,at:n,updatedAt:n}).catch(fail)};
+  $('#ed').onfocusout=()=>setTimeout(()=>{if(tab==='spaces'&&stale&&!$('#ed').contains(document.activeElement))showSpaces()},50);
+  $('#ed').querySelectorAll('.note').forEach(el=>{
+    const ref=db.doc(`novels/${novelId}/pages/${el.dataset.id}`),ta=el.querySelector('textarea'),ti=el.querySelector('.mtl'),x=el.querySelector('.x');let t;
+    attFill(el,ref,()=>pages);
+    el.querySelector('.pd').onclick=()=>dlSave(slug(ti.value)+'.md','# '+(ti.value||'Untitled')+'\n\n'+ta.value);
+    el.querySelector('.pm').onclick=()=>{const order=chapters.length?Math.max(...chapters.map(c=>c.order||0))+1:1,b=ta.value;db.collection(`novels/${novelId}/chapters`).add({title:ti.value||'Untitled chapter',content:b,html:paras(b),order,status:'Draft',by:myId,updatedBy:myId,updatedAt:Date.now()}).then(()=>toast('Added as a new chapter. The page stays here too.')).catch(fail)};
+    const sv=()=>{typ();clearTimeout(t);t=setTimeout(()=>ref.update({title:ti.value,body:ta.value,updatedBy:myId,updatedAt:Date.now()}).catch(fail),600)};
+    ta.oninput=sv;ti.oninput=sv;
+    x.onclick=()=>{if(x.dataset.a){ref.delete().catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
+  });
+}
+function route(){
+  const h=location.hash.slice(1),id=/^[\w-]+$/.test(h)?h:null;
+  if(id!==novelId||!built){
+    novelId=id;chapId=null;chapters=[];pending=null;dirty=false;built=true;
+    if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];
+    id?buildNovel():buildHome();
+    if(id){subC();subNotes();subStats();subEv();subMemos();subSpaces()}setPres();
+  }
+  refresh();
+}
+window.addEventListener('hashchange',route);
+window.addEventListener('beforeunload',()=>{save()});
+db.collection('novels').orderBy('createdAt','desc').onSnapshot(s=>{
+  novels=s.docs.map(d=>({id:d.id,...d.data()}));
+  resolve(novels.map(n=>n.by));
+  if(!built)route();else refresh();
+},fail);
+route();
+})();
+</script>
+</body>
+</html>
