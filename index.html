@@ -1606,7 +1606,7 @@ function showMk(id){
     const m=mks.find(z=>z.id===el.dataset.mk);if(!m)return;
     const ref=db.doc(`novels/${novelId}/chapters/${id}/marks/${m.id}`),j=el.querySelector('.mj'),r=el.querySelector('.mr'),d=el.querySelector('.md');
     if(j)j.onclick=()=>{const s=mkSpan(m.id);if(s){s.scrollIntoView({block:'center',behavior:'smooth'});s.style.outline='2px solid var(--acc)';setTimeout(()=>s.style.outline='',1500)}else toast('That text was edited or removed.')};
-    if(r)r.onclick=()=>{unwrapMk(m.id);ref.update({resolved:true}).catch(fail)};
+    if(r)r.onclick=()=>{unwrapMk(m.id);ref.delete().catch(fail)};
     if(d)d.onclick=()=>{unwrapMk(m.id);ref.delete().catch(fail)};
     const ri=el.querySelector('.rpi'),rb=el.querySelector('.rpb');
     const sr=()=>{const t=ri.value.trim();if(!t)return;const cur=(mks.find(z=>z.id===m.id)||{}).replies||[];ri.value='';ref.update({replies:[...cur,{by:myId,at:Date.now(),text:t.slice(0,2000)}]}).catch(fail)};
