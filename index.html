@@ -230,9 +230,9 @@ function subC(){
 function open(id){
   const c=chapters.find(x=>x.id===id);if(!c)return;
   chapId=id;tab='ed';dirty=false;armed=false;savedAt=c.updatedAt;
-  $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span><button id="dc">Delete</button></div>
+  $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><button id="sp">Spelling</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span><button id="dc">Delete</button></div>
   <div class="warn" id="warn" hidden>Your co-author saved changes to this chapter. <button id="ld">Load their version</button> <small>(replaces your unsaved edits)</small></div>
-  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="tb" id="tb"><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
+  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
   <div class="foot"><span id="wcn"></span><span id="lb" class="muted"></span></div>
   <div class="cm" id="vh" hidden><h3>Version history</h3><button id="sv">Save a version now</button><div id="vl" style="margin-top:10px"></div></div>
   <div class="cm"><h3>Inline comments</h3><div id="mkl"></div></div>
@@ -245,6 +245,7 @@ function open(id){
   $('#fr').onclick=()=>{const r=$('#frr');r.hidden=!r.hidden;if(!r.hidden)$('#fi').focus()};
   $('#fi').oninput=()=>{const q=$('#fi').value;$('#fn').textContent=q?(($('#cb').value.match(new RegExp(rxEsc(q),'gi'))||[]).length+' found'):''};
   $('#fa').onclick=replAll;
+  $('#sp').onclick=()=>{const p=$('#spp');p.hidden=!p.hidden;if(!p.hidden)spellRun()};$('#spr').onclick=spellRun;$('#spx').onclick=()=>{$('#spp').hidden=true};$('#spc').onchange=spellRun;
   $('#dlf').onchange=e=>{const f=e.target.value;e.target.selectedIndex=0;if(!f)return;const t=$('#ct').value.trim()||'chapter';dlSave(slug(t)+'.'+f,chFile(f,t,$('#cb').value,$('#cb').html))};
   $('#sv').onclick=()=>snap('Saved version').then(()=>toast('Version saved')).catch(fail);$('#up').onclick=()=>move(-1);$('#dn').onclick=()=>move(1);
   $('#mw').onclick=()=>mode(false);$('#mr').onclick=()=>mode(true);
@@ -284,6 +285,57 @@ async function save(){
   savedAt=at;dirty=false;
   try{await db.doc(`novels/${novelId}/chapters/${id}`).update(data);const dw=wc(data.content)-lastWc;lastWc=wc(data.content);if(dw>0){logWords(dw);if(sprintEnd)sprintW+=dw}const s=$('#st');if(s)s.textContent='Saved'}
   catch(e){dirty=true;fail(e)}
+}
+
+// ---- Spell check (Typo.js + en_US dictionary, loaded only when you click Spelling) ----
+let typo=null,typoP=null,spRun=0;const spIgn=new Set(),SPK='ink-dict';
+const myWords=()=>{try{return JSON.parse(localStorage.getItem(SPK)||'[]')}catch(e){return[]}};
+function loadTypo(){
+  return typoP||(typoP=new Promise((res,rej)=>{
+    const B='https://cdn.jsdelivr.net/npm/typo-js@1.2.4/',sc=document.createElement('script');
+    sc.src=B+'typo.js';
+    sc.onload=async()=>{try{const [a,d]=await Promise.all([fetch(B+'dictionaries/en_US/en_US.aff').then(r=>r.text()),fetch(B+'dictionaries/en_US/en_US.dic').then(r=>r.text())]);typo=new Typo('en_US',a,d);res(typo)}catch(e){rej(e)}};
+    sc.onerror=()=>rej(new Error('Could not load the dictionary'));
+    document.head.appendChild(sc);
+  }).catch(e=>{typoP=null;throw e}));
+}
+function spellFix(from,to){
+  const tw=document.createTreeWalker($('#cb'),NodeFilter.SHOW_TEXT),rx=new RegExp("(^|[^A-Za-z])"+rxEsc(from)+"(?![A-Za-z]|['’][A-Za-z])",'g'),ns=[];
+  while(tw.nextNode())ns.push(tw.currentNode);
+  ns.forEach(n=>{n.nodeValue=n.nodeValue.replace(rx,(m,p)=>p+to)});
+  $('#cb').dispatchEvent(new Event('input'));
+}
+async function spellRun(){
+  const my=++spRun,st=$('#sps'),lst=$('#spl');if(!st||!lst)return;
+  lst.innerHTML='';st.textContent='Loading dictionary…';
+  try{await loadTypo()}catch(e){st.textContent='Could not load the dictionary. Check your connection and try again.';return}
+  if(my!==spRun||!$('#spl'))return;
+  const skipCap=$('#spc').checked,mine=new Set(myWords().map(w=>w.toLowerCase())),seen=new Map();
+  for(const m of $('#cb').value.matchAll(/[A-Za-z]+(?:['’][A-Za-z]+)*/g)){
+    const w=m[0],k=w.replace(/’/g,"'");
+    if(w.length<2||w===w.toUpperCase()||(skipCap&&/^[A-Z]/.test(w))||mine.has(k.toLowerCase())||spIgn.has(k.toLowerCase()))continue;
+    if(typo.check(k))continue;
+    seen.set(w,(seen.get(w)||0)+1);
+  }
+  const all=[...seen.entries()],list=all.slice(0,40);
+  if(!all.length){st.textContent='No misspelled words found 🎉';return}
+  st.textContent=all.length+' possible misspelling'+(all.length>1?'s':'')+(all.length>40?' (showing first 40)':'');
+  list.forEach(([w,n])=>{
+    const r=document.createElement('div');r.className='nt';r.style.cssText='flex-wrap:wrap;margin:6px 0';
+    r.innerHTML=`<b>${esc(w)}</b><small>×${n}</small><span class="sg"><small>…</small></span><button class="ig">Ignore</button><button class="ad" title="Save to this browser's dictionary">Add to dictionary</button>`;
+    r.querySelector('.ig').onclick=()=>{spIgn.add(w.replace(/’/g,"'").toLowerCase());r.remove()};
+    r.querySelector('.ad').onclick=()=>{try{const a=myWords();a.push(w.replace(/’/g,"'").toLowerCase());localStorage.setItem(SPK,JSON.stringify(a))}catch(e){}r.remove()};
+    lst.appendChild(r);
+  });
+  for(const r of lst.children){
+    await new Promise(x=>setTimeout(x,0));
+    if(my!==spRun||!r.isConnected)return;
+    const w=r.querySelector('b').textContent,sg=r.querySelector('.sg');
+    let sug=[];try{sug=typo.suggest(w.replace(/’/g,"'"),5)}catch(e){}
+    sg.innerHTML='';
+    if(!sug.length){sg.innerHTML='<small>no suggestions</small>';continue}
+    sug.forEach(x=>{const b=document.createElement('button');b.className='pri';b.textContent=x;b.onclick=()=>{spellFix(w,x);r.remove()};sg.appendChild(b)});
+  }
 }
 
 const KINDS=['Character','Place','Lore','Plot'];
