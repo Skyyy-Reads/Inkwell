@@ -32,7 +32,7 @@ aside{border-right:1px solid var(--line);padding:18px;display:flex;flex-directio
 .ch{display:block;width:100%;text-align:left}
 .ch small{display:block}
 .ch.on{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
-#ed{padding:18px 24px;max-width:820px;width:100%}
+#ed{padding:18px 24px;max-width:900px;width:100%;margin:0 auto}
 .bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 .bar .sp{flex:1}
 .ctitle{font:700 26px Georgia,serif;border:none;background:transparent;padding:6px 0}
@@ -80,6 +80,32 @@ hr:before{content:"* * *";letter-spacing:.6em;color:var(--mut)}
 .tp p{text-indent:0}
 #tg{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:38px;height:38px;padding:0;border-radius:50%;z-index:4}
 @media (max-width:700px){.layout{grid-template-columns:1fr}aside{border-right:none;border-bottom:1px solid var(--line)}#ed{padding:14px}}
+#qn,#qnb{display:none}
+.qn-on #qn{display:flex;flex-direction:column;gap:8px;padding:14px;border-left:1px solid var(--line);overflow-y:auto;max-height:100vh;position:sticky;top:0;align-self:start;min-width:0}
+#qn input,#qn textarea{min-width:0;width:100%;box-sizing:border-box}
+#qn textarea{resize:vertical}
+#qn .mtl{flex:1}
+#qn .row{display:flex;gap:6px}
+body:not(.qn-on) #qnb{display:block;position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30}
+.focus #qn,.focus #qnb{display:none!important}
+@media (min-width:1150px){.qn-on .layout{grid-template-columns:280px minmax(0,1fr) 300px}}
+@media (max-width:1149px){.qn-on #qn{position:fixed;right:0;top:0;bottom:0;max-height:none;width:min(340px,100vw);z-index:40;background:var(--bg);box-shadow:-8px 0 24px rgba(0,0,0,.25)}}
+.mainc{min-width:0}
+.otb{display:flex;align-items:flex-end;gap:2px;height:40px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 12px;background:var(--bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:6;scrollbar-width:thin}
+.otb[hidden]{display:none}
+.ot{display:flex;align-items:center;gap:6px;flex:0 0 auto;max-width:220px;height:34px;padding:0 6px 0 12px;border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;background:var(--card);color:var(--mut);cursor:pointer;font-size:14px;white-space:nowrap}
+.ot:hover{color:var(--fg)}
+.ot .t{overflow:hidden;text-overflow:ellipsis}
+.ot.on{color:var(--fg);background:var(--bg);box-shadow:inset 0 2px 0 var(--acc);height:35px;margin-bottom:-1px}
+.ot .cx{border:none;background:transparent;padding:0 5px;border-radius:4px;line-height:1.3;color:var(--mut);font-size:12px}
+.ot .cx:hover{background:var(--line);color:var(--fg)}
+.otp{flex:0 0 auto;height:30px;padding:0 10px;border:none;background:transparent;font-size:20px;line-height:1;color:var(--mut)}
+.hastabs .tb{top:calc(env(safe-area-inset-top,0px) + 40px)}
+.focus .otb{display:none}
+.focus .tb{top:env(safe-area-inset-top,0px)}
+.ndel{color:#c0392b;border-color:currentColor;background:transparent;font-size:13px;padding:4px 10px}
+.ndel[hidden]{display:none}
+span[style*="background-color"]{box-decoration-break:clone;-webkit-box-decoration-break:clone}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -174,14 +200,18 @@ function buildHome(){
 }
 function updHome(){
   const l=$('#list');if(!l)return;
-  l.innerHTML=novels.length?novels.map(n=>`<a class="card" href="#${n.id}"><h3>${esc(n.title)}</h3><p class="muted">${esc(n.synopsis)}</p><small>Started by ${esc(nm(n.by))}</small></a>`).join(''):'<p class="muted">No novels yet. Create the first one above.</p>';
+  l.onclick=e=>{const b=e.target.closest('.ndel');if(b){e.preventDefault();e.stopPropagation();delNovel(b.dataset.id)}};
+  l.innerHTML=novels.length?novels.map(n=>`<a class="card" href="#${n.id}"><h3>${esc(n.title)}</h3><p class="muted">${esc(n.synopsis)}</p><small>Started by ${esc(nm(n.by))}</small>${myId&&n.by===myId?`<div style="margin-top:8px"><button class="ndel" data-id="${n.id}">${delArm===n.id?'Sure? Click again':'Delete'}</button></div>`:''}</a>`).join(''):'<p class="muted">No novels yet. Create the first one above.</p>';
 }
 
 function buildNovel(){
-  app.innerHTML=`<div class="top"><a href="#" class="brand" id="back">← Inkwell</a><div class="who" id="pr">${esc(myName)}</div></div>
-  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button></aside>
-  <section id="ed"><p class="muted">Pick or create a chapter to begin.</p></section></div>`;
+  app.innerHTML=`<div class="top"><a href="#" class="brand" id="back">← Inkwell</a><button id="dnv2" class="ndel" hidden>Delete novel</button><div class="who" id="pr">${esc(myName)}</div></div>
+  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button><button id="dnv" class="ndel" hidden>Delete novel</button></aside>
+  <div class="mainc"><div class="otb" id="otb" hidden></div><section id="ed"><p class="muted">Pick or create a chapter to begin.</p></section></div><div id="qn"></div></div><button id="qnb" class="pri" title="Open quick notes">📝 Notes</button>`;
   $('#back').onclick=async e=>{await save()};
+  {let v=null;try{v=localStorage.getItem('ink-qn')}catch(e){}qnSet(v===null?innerWidth>=1200:v==='1',true)}
+  $('#qnb').onclick=()=>qnSet(true);
+  $('#dnv').onclick=$('#dnv2').onclick=()=>delNovel(novelId);$('#otb').onclick=otClick;otRender();
   $('#bcx').onclick=async()=>{await save();chapId=null;updNovel();setPres();showCodex()};
   $('#bbk').onclick=async()=>{await save();chapId=null;updNovel();setPres();showBook()};
   $('#sq').oninput=updNovel;
@@ -209,6 +239,7 @@ function updNovel(){
   const n=novels.find(x=>x.id===novelId);
   $('#nvt').textContent=n?n.title:(novels.length?'Novel not found':'Loading…');
   $('#nvs').textContent=n&&n.synopsis||'';
+  ['#dnv','#dnv2'].forEach(q=>{const dv=$(q);if(dv){dv.hidden=!(n&&myId&&n.by===myId);dv.textContent=delArm===novelId?'Sure? Click again to delete everything':'Delete novel'}});
   const tw=chapters.reduce((a,c)=>a+wc(c.content),0),g=n&&n.goal||0;
   $('#gp').innerHTML=`<small>${tw.toLocaleString()} words${g?` of ${g.toLocaleString()}`:''}</small>`+(g?`<div class="prog"><i style="width:${Math.min(100,tw/g*100)}%"></i></div>`:'');
   if(document.activeElement!==$('#gi'))$('#gi').value=g||'';
@@ -220,6 +251,7 @@ function updNovel(){
 function subC(){
   unsubC=db.collection(`novels/${novelId}/chapters`).orderBy('order').onSnapshot(s=>{
     chapters=s.docs.map(d=>({id:d.id,...d.data()}));
+    chLoaded=true;otRender();
     resolve(chapters.map(c=>c.updatedBy));if(tab==='files')showFiles();if(tab==='book')showBook();if(tab==='outline'&&!$('#ed').contains(document.activeElement))showOutline();
     updNovel();
     if(chapId){const c=chapters.find(x=>x.id===chapId);
@@ -232,7 +264,7 @@ function open(id){
   chapId=id;tab='ed';dirty=false;armed=false;savedAt=c.updatedAt;
   $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><button id="sp">Spelling</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span><button id="dc">Delete</button></div>
   <div class="warn" id="warn" hidden>Your co-author saved changes to this chapter. <button id="ld">Load their version</button> <small>(replaces your unsaved edits)</small></div>
-  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="undo" title="Undo (Ctrl+Z)">↶</button><button data-c="redo" title="Redo (Ctrl+Y)">↷</button><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
+  <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="undo" title="Undo (Ctrl+Z)">↶</button><button data-c="redo" title="Redo (Ctrl+Y)">↷</button><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><button data-c="justifyFull" title="Justify">☰</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
   <div class="foot"><span id="wcn"></span><span id="lb" class="muted"></span></div>
   <div class="cm" id="vh" hidden><h3>Version history</h3><button id="sv">Save a version now</button><div id="vl" style="margin-top:10px"></div></div>
   <div class="cm"><h3>Inline comments</h3><div id="mkl"></div></div>
@@ -256,7 +288,7 @@ function open(id){
     clearTimeout(timer);dirty=false;
     db.doc(`novels/${novelId}/chapters/${chapId}`).delete().catch(fail);
   };
-  updNovel();
+  updNovel();trk();
 }
 function fill(c){
   $('#ct').value=c.title||'';rte($('#cb'));if(c.html)$('#cb').html=c.html;else $('#cb').value=c.content||'';$('#ctg').value=c.tags||'';$('#cwt').value=c.target||'';$('#sts').value=c.status||'Draft';lastWc=wc(c.content);
@@ -372,7 +404,7 @@ function subNotes(){
   },fail);
 }
 function showCodex(){
-  tab='codex';const shown=notes.filter(n=>cxf==='All'||n.kind===cxf);
+  tab='codex';trk();const shown=notes.filter(n=>cxf==='All'||n.kind===cxf);
   $('#ed').innerHTML=`<h2>Codex</h2><p class="muted">Characters, places, lore and plot threads you both can see.</p><div class="tabs" id="cf" style="margin-bottom:10px">${['All',...KINDS].map(k=>`<button class="${k===cxf?'on2':''}" data-k="${k}">${k}</button>`).join('')}</div><div class="row"><select id="nk">${KINDS.map(k=>`<option>${k}</option>`).join('')}</select><input id="nn" placeholder="Name"><button class="pri" id="na">Add</button></div>`+
   (shown.length?shown.map(n=>`<div class="note" data-id="${n.id}"><div class="nt"><b>${esc(n.name)}</b><span class="badge">${esc(n.kind)}</span><span style="flex:1"></span><button class="x">Delete</button></div><textarea placeholder="Description, abilities, secrets…">${esc(n.body)}</textarea><div class="at"></div></div>`).join(''):'<p class="muted">Nothing here yet. Add your first character or piece of lore.</p>');
   $('#cf').onclick=e=>{const b=e.target.closest('button');if(b){cxf=b.dataset.k;showCodex()}};
@@ -392,7 +424,7 @@ function showCodex(){
   });
 }
 function showBook(){
-  tab='book';
+  tab='book';trk();
   const list=chapters.filter(c=>drafts||c.status==='Published'),words=list.reduce((a,c)=>a+wc(c.content),0);
   const n=novels.find(x=>x.id===novelId)||{};
   const au=[...new Set(chapters.map(c=>c.by).concat(n.by).filter(Boolean))].map(u=>u===myId?myName:(names[u]||'')).filter(Boolean).join(' & ');
@@ -495,8 +527,78 @@ function showVh(id){
 }
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save()}});
 let cxf='All';
+// ---- Delete a novel (only the person who started it) ----
+let delArm=null,delT=null;
+async function delCol(path,subs){
+  const q=await db.collection(path).get();
+  await Promise.all(q.docs.map(async d=>{
+    for(const sub of subs||[])await delCol(d.ref.path+'/'+sub);
+    await d.ref.delete();
+  }));
+}
+async function wipeNovel(id){
+  const base='novels/'+id;
+  await delCol(base+'/chapters',['comments','versions','marks']);
+  for(const c of ['notes','stats','events','memos','spaces','pages'])await delCol(base+'/'+c);
+  await db.doc(base).delete();
+}
+async function delNovel(id){
+  const n=novels.find(x=>x.id===id);
+  if(!n||!myId||n.by!==myId)return toast('Only the person who started this novel can delete it.');
+  if(delArm!==id){delArm=id;clearTimeout(delT);delT=setTimeout(()=>{delArm=null;refresh()},4000);refresh();return}
+  clearTimeout(delT);delArm=null;clearTimeout(timer);dirty=false;
+  if(novelId===id)location.hash='';
+  toast('Deleting “'+(n.title||'novel')+'”…');
+  try{await wipeNovel(id);toast('Novel deleted.')}catch(e){fail(e)}
+}
+// ---- Obsidian-style tabs: chapters and views stay open side by side ----
+let otabs=[],chLoaded=false;
+const OTV={codex:['📖','Codex'],book:['📚','Read novel'],outline:['🧾','Outline'],timeline:['⏳','Timeline'],memos:['🗒','Notes'],spaces:['🗂','Spaces'],files:['📎','Files']};
+const curKey=()=>tab==='ed'?(chapId?'c:'+chapId:null):tab;
+const otKey=()=>'ink-tabs-'+novelId;
+function otSave(){try{localStorage.setItem(otKey(),JSON.stringify(otabs))}catch(e){}}
+function otLoad(){try{const a=JSON.parse(localStorage.getItem(otKey())||'[]');return Array.isArray(a)?a.filter(k=>typeof k==='string'&&(OTV[k]||/^c:[\w-]+$/.test(k))).slice(0,20):[]}catch(e){return[]}}
+function trk(){const k=curKey();if(k&&!otabs.includes(k)){otabs.push(k);otSave()}otRender()}
+function otRender(){
+  const el=$('#otb');
+  if(!el){document.body.classList.remove('hastabs');return}
+  if(chLoaded){const n=otabs.length;otabs=otabs.filter(k=>!k.startsWith('c:')||chapters.some(c=>c.id===k.slice(2)));if(n!==otabs.length)otSave()}
+  const cur=curKey();
+  document.body.classList.toggle('hastabs',otabs.length>0);
+  el.hidden=!otabs.length;
+  el.innerHTML=otabs.map(k=>{
+    const v=OTV[k],c=v?null:chapters.find(x=>x.id===k.slice(2)),label=v?v[0]+' '+v[1]:((c&&c.title)||'Chapter');
+    return `<div class="ot${k===cur?' on':''}" data-k="${esc(k)}" title="${esc(label)}"><span class="t">${esc(label)}</span><button class="cx" title="Close tab">✕</button></div>`;
+  }).join('')+'<button class="otp" id="otn" title="New chapter">+</button>';
+}
+async function otGo(k){
+  if(k===curKey())return;
+  await save();
+  if(k.startsWith('c:'))return open(k.slice(2));
+  chapId=null;updNovel();
+  const f={codex:showCodex,book:showBook,outline:showOutline,timeline:showTimeline,memos:showMemos,spaces:showSpaces,files:showFiles}[k];
+  if(f)f();
+  setPres();
+}
+async function otClose(k){
+  const i=otabs.indexOf(k);if(i<0)return;
+  const was=k===curKey();
+  if(was)await save();
+  otabs.splice(i,1);otSave();
+  if(!was)return otRender();
+  const nx=otabs[i]||otabs[i-1];
+  if(nx)return otGo(nx);
+  chapId=null;dirty=false;tab='ed';
+  $('#ed').innerHTML='<p class="muted">Pick or create a chapter to begin.</p>';
+  updNovel();setPres();otRender();
+}
+function otClick(e){
+  if(e.target.closest('#otn'))return $('#addc').click();
+  const t=e.target.closest('.ot');if(!t)return;
+  e.target.closest('.cx')?otClose(t.dataset.k):otGo(t.dataset.k);
+}
 function showOutline(){
-  tab='outline';
+  tab='outline';trk();
   $('#ed').innerHTML=`<h2>Outline</h2><p class="muted">One line per chapter: what happens and why it matters. Edits save automatically.</p>`+(chapters.length?chapters.map((c,i)=>`<div class="note" data-id="${c.id}"><div class="nt"><b>${i+1}. ${esc(c.title)}</b><span class="badge ${c.status||'Draft'}">${c.status||'Draft'}</span><span style="flex:1"></span><small>${wc(c.content)} words</small><button class="go">Open</button></div><textarea placeholder="What happens in this chapter?">${esc(c.summary)}</textarea></div>`).join(''):'<p class="muted">Add a chapter to start your outline.</p>');
   $('#ed').querySelectorAll('.note').forEach(el=>{
     const ref=db.doc(`novels/${novelId}/chapters/${el.dataset.id}`),ta=el.querySelector('textarea');let t;
@@ -591,7 +693,7 @@ function subEv(){
   },()=>{});
 }
 function showTimeline(){
-  tab='timeline';
+  tab='timeline';trk();
   $('#ed').innerHTML=`<h2>Timeline</h2><p class="muted">Story events in order, so you both keep the plot straight.</p><div class="row"><input id="tw" placeholder="When (e.g. Year 3, Day 12)" style="flex:0 1 220px"><input id="tt" placeholder="What happens"><button class="pri" id="ta">Add event</button></div>`+(evs.length?evs.map(e=>`<div class="note" data-id="${e.id}"><div class="nt"><span class="badge">${esc(e.when||'—')}</span><b>${esc(e.title)}</b><span style="flex:1"></span><button class="u">↑</button><button class="d">↓</button><button class="x">Delete</button></div><textarea placeholder="Details…">${esc(e.body)}</textarea></div>`).join(''):'<p class="muted">No events yet. Add the first one above.</p>');
   $('#ta').onclick=()=>{
     const title=$('#tt').value.trim();if(!title)return toast('Describe the event first.');
@@ -610,6 +712,7 @@ function showTimeline(){
 let memos=[],pmemos=[],unsubMm=null,unsubPm=null,puid=null,pmOk=true,memoTab='shared';
 function memoUpd(o,list){
   if(tab==='memos'&&(o!==list.map(m=>m.id).join()||!$('#ed').contains(document.activeElement)))showMemos();
+  const q=$('#qn');if(q&&(o!==list.map(m=>m.id).join()||!q.contains(document.activeElement)))qnRender();
 }
 async function subMemos(){
   const id=novelId;
@@ -627,8 +730,33 @@ async function subMemos(){
   if(id!==novelId)u();else unsubPm=u;
   if(tab==='memos'&&memoTab==='private')showMemos();
 }
+let qnTab='shared';
+function qnSet(on,init){document.body.classList.toggle('qn-on',on);if(!init){try{localStorage.setItem('ink-qn',on?'1':'0')}catch(e){}}if(on)qnRender()}
+function qnRender(){
+  const el=$('#qn');if(!el||!document.body.classList.contains('qn-on'))return;
+  const priv=qnTab==='private',list=(priv?pmemos:memos).slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.at||0)-(a.at||0));
+  const body=priv&&!pmOk?'<p class="muted">Private notes aren’t available right now.</p>':priv&&!puid?'<p class="muted">Loading…</p>':`<div class="row"><input id="qti" placeholder="New note title"><button class="pri" id="qad">Add</button></div>`+(list.length?list.map(m=>`<div class="note" data-id="${m.id}"><div class="nt"><button class="pin" title="Pin to top">${m.pinned?'★':'☆'}</button><input class="mtl" value="${esc(m.title)}" style="font-weight:700"><button class="x">Delete</button></div><textarea rows="5" placeholder="Write your note…">${esc(m.body)}</textarea>${priv?'':'<small>'+esc(nm(m.by))+'</small>'}</div>`).join(''):'<p class="muted">No notes yet.</p>');
+  el.innerHTML=`<div class="nt"><b style="flex:1">📝 Notes</b><button id="qx" title="Close">✕</button></div><div class="tabs" id="qt"><button data-s="shared" class="${priv?'':'on2'}">Shared</button><button data-s="private" class="${priv?'on2':''}">Private</button></div>`+body;
+  $('#qx').onclick=()=>qnSet(false);
+  $('#qt').onclick=e=>{const b=e.target.closest('button');if(b){qnTab=b.dataset.s;qnRender()}};
+  const col=()=>priv?db.collection('data/users/'+puid):db.collection(`novels/${novelId}/memos`);
+  const dref=id=>priv?db.doc(`data/users/${puid}/${id}`):db.doc(`novels/${novelId}/memos/${id}`);
+  const add=$('#qad');
+  if(add){
+    const go=()=>{const title=$('#qti').value.trim();if(!title)return toast('Give the note a title first.');col().add(priv?{novel:novelId,title,body:'',pinned:false,at:Date.now()}:{title,body:'',pinned:false,by:myId,at:Date.now()}).catch(fail)};
+    add.onclick=go;$('#qti').onkeydown=e=>{if(e.key==='Enter')go()};
+  }
+  el.querySelectorAll('.note').forEach(n=>{
+    const ref=dref(n.dataset.id),ta=n.querySelector('textarea'),ti=n.querySelector('.mtl'),x=n.querySelector('.x');let t=null;
+    const flush=()=>{if(t){clearTimeout(t);t=null;ref.update({title:ti.value,body:ta.value}).catch(fail)}};
+    const sv=()=>{clearTimeout(t);t=setTimeout(flush,800)};
+    ta.oninput=sv;ti.oninput=sv;ta.onblur=flush;ti.onblur=flush;
+    n.querySelector('.pin').onclick=()=>{const m=list.find(z=>z.id===n.dataset.id);ref.update({pinned:!(m&&m.pinned)}).catch(fail)};
+    x.onclick=()=>{if(x.dataset.a){ref.delete().catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
+  });
+}
 function showMemos(){
-  tab='memos';
+  tab='memos';trk();
   const priv=memoTab==='private',list=(priv?pmemos:memos).slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||(b.at||0)-(a.at||0));
   const head=`<h2>Notes</h2><div class="tabs" id="mt"><button data-s="shared" class="${priv?'':'on2'}">Shared with co-author</button><button data-s="private" class="${priv?'on2':''}">Private (only you)</button></div><p class="muted">${priv?'Only you can see these. Good for secret plans and spoilers.':'You and your co-author both see these: ideas, to-dos, research.'}</p>`;
   const body=priv&&!pmOk?'<p class="muted">Private notes aren’t available right now.</p>':priv&&!puid?'<p class="muted">Loading…</p>':`<div class="row"><input id="mti" placeholder="Note title"><button class="pri" id="mad">Add note</button></div>`+(list.length?list.map(m=>`<div class="note" data-id="${m.id}"><div class="nt"><button class="pin" title="Pin to top">${m.pinned?'★':'☆'}</button><input class="mtl" value="${esc(m.title)}" style="font-weight:700"><button class="x">Delete</button></div><textarea placeholder="Write your note…">${esc(m.body)}</textarea><small>${priv?'':esc(nm(m.by))+' · '}${new Date(m.at||0).toLocaleDateString()}</small></div>`).join(''):'<p class="muted">No notes yet. Add the first one above.</p>');
@@ -677,7 +805,7 @@ function allFiles(){
   return out.filter(o=>/^[0-9a-f]{32}$/.test((o.a&&o.a.id)||''));
 }
 function showFiles(){
-  tab='files';
+  tab='files';trk();
   const all=allFiles(),img=o=>/^image\//.test(o.a.type||''),list=flt==='all'?all:flt==='img'?all.filter(img):all.filter(o=>!img(o));
   const total=all.reduce((s,o)=>s+(+o.a.size||0),0);
   $('#ed').innerHTML=`<h2>Files</h2><p class="muted">Everything attached to chapters, the codex and spaces. ${all.length} file${all.length===1?'':'s'} · ${fsz(total)}</p><div class="tabs" id="ff2">${[['all','All'],['img','Images'],['oth','Documents']].map(([k,l])=>`<button data-k="${k}" class="${k===flt?'on2':''}">${l}</button>`).join('')}</div><div class="grid" style="margin-top:12px">`+(list.length?list.map((o,i)=>`<div class="card"><div style="height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden">${img(o)?`<img src="/_blob/${o.a.id}" alt="" style="max-width:100%;max-height:90px;border-radius:6px">`:'<span style="font-size:36px">📄</span>'}</div><p style="margin:.5em 0 0;overflow-wrap:anywhere"><a href="/_blob/${o.a.id}" target="_blank" rel="noopener" style="text-decoration:underline">${esc(o.a.name)}</a></p><small>${fsz(+o.a.size||0)} · ${esc(o.src)}</small><br><button class="go" data-i="${i}" style="margin-top:6px">Open source</button></div>`).join(''):'<p class="muted">No files yet. Use 📎 Attach file on a chapter, codex entry or page.</p>')+'</div>';
@@ -687,10 +815,27 @@ function showFiles(){
 document.head.appendChild(Object.assign(document.createElement('style'),{id:'mkst'}));
 const HLO='<option value="#fff2a8">Yellow</option><option value="#c8f0c8">Green</option><option value="#ffd0e0">Pink</option><option value="#cfe6ff">Blue</option><option value="none">Remove</option>';
 function hlP(v){
+  // Highlight every text run in the paragraph(s) on its own, so the colour sits inside
+  // each run's own font size instead of wrapping around larger text and being cut off.
   const cb=$('#cb'),blk=n=>{while(n&&n!==cb&&!/^(P|DIV)$/.test(n.nodeName))n=n.parentNode;return n&&n!==cb?n:null};
   if(!rng||!cb.contains(rng.commonAncestorContainer))return toast('Click inside a paragraph first.');
-  const a=blk(rng.startContainer),b=blk(rng.endContainer);if(!a||!b)return toast('Click inside a paragraph first.');
-  const r=document.createRange();r.setStart(a,0);r.setEnd(b,b.childNodes.length);rng=r;fmt('hiliteColor',v);
+  const flat=!cb.querySelector('p,div');
+  const a=blk(rng.startContainer)||(flat?cb:null),b=blk(rng.endContainer)||(flat?cb:null);
+  if(!a||!b)return toast('Click inside a paragraph first.');
+  const r=document.createRange();
+  if(a===cb)r.selectNodeContents(cb);else{r.setStart(a,0);r.setEnd(b,b.childNodes.length)}
+  const tw=document.createTreeWalker(cb,NodeFilter.SHOW_TEXT),ns=[];
+  while(tw.nextNode()){const t=tw.currentNode;if(t.nodeValue&&r.intersectsNode(t))ns.push(t)}
+  if(!ns.length)return;
+  cb.focus();const sel=getSelection();
+  for(let i=ns.length-1;i>=0;i--){
+    const t=ns[i];if(!t.isConnected)continue;
+    const x=document.createRange();x.selectNodeContents(t);
+    sel.removeAllRanges();sel.addRange(x);
+    document.execCommand('hiliteColor',false,v);
+  }
+  try{sel.removeAllRanges();sel.addRange(r);rng=r.cloneRange()}catch(e){}
+  cb.dispatchEvent(new Event('input'));
 }
 function startCm(){
   const cb=$('#cb');
@@ -789,7 +934,7 @@ function pgSync(){
   });
 }
 function showSpaces(){
-  tab='spaces';stale=false;
+  tab='spaces';stale=false;trk();
   const sl=spList();if(!sl.some(x=>x[0]===spTab))spTab='drafts';
   const cur=inSp();
   $('#ed').innerHTML=`<h2>Spaces</h2><p class="muted">Separate rooms for drafts, ideas, themes and characters. You and your co-author see each other’s edits live.</p><div class="tabs" id="spt">${sl.map(x=>`<button data-s="${esc(x[0])}" class="${x[0]===spTab?'on2':''}">${x[1]} ${esc(x[2])}</button>`).join('')}</div><div class="row"><input id="snn" placeholder="New space name (e.g. Worldbuilding)"><button id="sna">Create space</button></div><p class="muted" id="sph">${sph(cur)}</p><div class="row"><input id="pgt" placeholder="New page title"><button class="pri" id="pga">Add page</button></div>`+(cur.length?cur.map(p=>`<div class="note" data-id="${p.id}"><div class="nt"><input class="mtl" value="${esc(p.title)}" style="font-weight:700"><button class="pd" title="Download this page">⬇</button><button class="pm" title="Copy this page into a new chapter">→ Chapter</button><button class="x">Delete</button></div><textarea placeholder="Write here…">${esc(p.body)}</textarea><div class="at"></div><small>${pgMeta(p)}</small></div>`).join(''):'<p class="muted">Nothing in this space yet. Add a page above.</p>');
@@ -810,7 +955,7 @@ function showSpaces(){
 function route(){
   const h=location.hash.slice(1),id=/^[\w-]+$/.test(h)?h:null;
   if(id!==novelId||!built){
-    novelId=id;chapId=null;chapters=[];pending=null;dirty=false;built=true;
+    novelId=id;chapId=null;chapters=[];pending=null;dirty=false;built=true;otabs=id?otLoad():[];chLoaded=false;if(!id)document.body.classList.remove('hastabs');
     if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];
     id?buildNovel():buildHome();
     if(id){subC();subNotes();subStats();subEv();subMemos();subSpaces()}setPres();
