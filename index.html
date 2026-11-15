@@ -129,6 +129,34 @@ body:not(.qn-on) #qnb{display:block;position:fixed;right:14px;bottom:calc(16px +
 .dz{margin-top:48px;border-top:1px solid var(--line);padding-top:10px}
 .dz[hidden]{display:none}
 .dz summary{cursor:pointer;color:var(--mut);font-size:13px}
+#svc{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--mut);pointer-events:none}
+#svc[hidden]{display:none}
+#fsb{display:none;position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;z-index:5;gap:10px;align-items:center;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+.focus #fsb{display:flex}
+#fsb input[type=number]{width:72px;padding:3px 6px}
+.ch[draggable=true]{cursor:grab}
+.ch.dtop{box-shadow:inset 0 3px 0 var(--acc)}
+.ch.dbot{box-shadow:inset 0 -3px 0 var(--acc)}
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}
+@media (max-width:800px){.board{grid-template-columns:1fr}}
+.bcol h3{margin:0 0 4px}
+.act{padding:8px 0;border-bottom:1px solid var(--line)}
+#ed:has(.vt),#ed:has(.board){max-width:1100px}
+.vt{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;margin-top:10px}
+@media (max-width:800px){.vt{grid-template-columns:1fr}}
+.vtside{display:flex;flex-direction:column;gap:8px;min-width:0}
+.vt textarea{width:100%;min-height:340px;box-sizing:border-box;font:inherit;line-height:1.6;resize:vertical}
+.vmd{line-height:1.7}
+.vmd h1,.vmd h2,.vmd h3{margin:14px 0 6px}
+.vmd a.vwl,.vmd a.vtag{color:var(--acc);text-decoration:underline;cursor:pointer}
+.vmd a.vmiss{opacity:.65;text-decoration-style:dashed}
+.vmd code{background:var(--card);padding:1px 5px;border-radius:4px}
+.vmd pre{background:var(--card);padding:10px;border-radius:8px;overflow:auto}
+.vmd blockquote{border-left:3px solid var(--line);margin:8px 0;padding:2px 12px;opacity:.9}
+.vmd ul,.vmd ol{padding-left:20px}
+.vmd .vck{margin-right:6px}
+.vl.miss{opacity:.7;border-style:dashed}
+.dcw{font-size:13px;padding:3px 10px;margin:2px 4px 2px 0}
 .dz input{margin:6px 0}
 span[style*="background-color"]{box-decoration-break:clone;-webkit-box-decoration-break:clone}
 </style>
@@ -137,7 +165,7 @@ span[style*="background-color"]{box-decoration-break:clone;-webkit-box-decoratio
 <body>
 <div id="app"></div>
 <div id="toast" hidden></div>
-<button id="xf">Exit focus</button>
+<button id="xf">Exit focus</button><div id="fsb"><span id="fsw"></span><label><input type="checkbox" id="fty" checked> Typewriter</label><input id="fsg" type="number" min="0" placeholder="Goal"></div>
 <button id="tg" title="Switch light or dark theme">◐</button>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -230,7 +258,7 @@ function updHome(){
 
 function buildNovel(){
   app.innerHTML=`<div class="top"><a href="#" class="brand" id="back">← Inkwell</a><div class="who" id="pr">${esc(myName)}</div></div>
-  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><button id="rnn" class="pin" hidden>✎ Rename novel</button><div class="row" id="rnr" hidden style="margin:0"><input id="rni" maxlength="120" placeholder="Novel title"><button class="pri" id="rns">Save</button><button id="rnx">Cancel</button></div><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><button id="bqs" title="Quick switcher (Ctrl+O or ⌘+O)">🔍 Jump to… (Ctrl/⌘+O)</button><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button><details id="dz" class="dz" hidden><summary>Danger zone</summary><p class="muted"><small>Deleting a novel removes all its chapters, notes and files for everyone, and can’t be undone. Type the novel’s title to confirm.</small></p><input id="dzi" placeholder="Type the novel title" autocomplete="off"><button id="dnv" class="ndel" disabled>Delete novel permanently</button></details></aside>
+  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><button id="rnn" class="pin" hidden>✎ Rename novel</button><div class="row" id="rnr" hidden style="margin:0"><input id="rni" maxlength="120" placeholder="Novel title"><button class="pri" id="rns">Save</button><button id="rnx">Cancel</button></div><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><button id="bqs" title="Quick switcher (Ctrl+O or ⌘+O)">🔍 Jump to… (Ctrl/⌘+O)</button><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bvt">🧠 Vault</button><button id="bbd">📋 Board</button><button id="bac">🔔 Activity</button><button id="bdc">📘 Dictionary</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button><details id="dz" class="dz" hidden><summary>Danger zone</summary><p class="muted"><small>Deleting a novel removes all its chapters, notes and files for everyone, and can’t be undone. Type the novel’s title to confirm.</small></p><input id="dzi" placeholder="Type the novel title" autocomplete="off"><button id="dnv" class="ndel" disabled>Delete novel permanently</button></details></aside>
   <div class="mainc"><div class="otb" id="otb" hidden></div><section id="ed"><p class="muted">Pick or create a chapter to begin.</p></section></div><div id="qn"></div></div><button id="qnb" class="pri" title="Open quick notes">📝 Notes</button>`;
   $('#back').onclick=async e=>{await save()};
   {let v=null;try{v=localStorage.getItem('ink-qn')}catch(e){}qnSet(v===null?innerWidth>=1200:v==='1',true)}
@@ -255,6 +283,25 @@ function buildNovel(){
   $('#bol').onclick=async()=>{await save();chapId=null;updNovel();setPres();showOutline()};
   $('#btl').onclick=async()=>{await save();chapId=null;updNovel();setPres();showTimeline()};
   $('#bnt').onclick=async()=>{await save();chapId=null;updNovel();setPres();showMemos()};
+  $('#bvt').onclick=async()=>{await save();chapId=null;updNovel();setPres();showVault()};
+  $('#bbd').onclick=async()=>{await save();chapId=null;updNovel();setPres();showBoard()};
+  $('#bac').onclick=async()=>{await save();chapId=null;updNovel();setPres();showActivity()};
+  $('#bdc').onmousedown=()=>{try{const t=getSelection().toString().trim();dcSel=/^[A-Za-z'’-]{2,40}$/.test(t)?t:''}catch(_){dcSel=''}};
+  $('#bdc').onclick=async()=>{const w=dcSel;dcSel='';await save();chapId=null;updNovel();setPres();showDict(w)};
+  {let drag=null;const L=$('#chl'),clr=()=>L.querySelectorAll('.ch').forEach(x=>x.classList.remove('dtop','dbot'));
+   L.addEventListener('dragstart',e=>{const b=e.target.closest('.ch[data-id]');if(!b||($('#sq').value||'').trim()){e.preventDefault();return}drag=b.dataset.id;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',drag)}catch(_){}});
+   L.addEventListener('dragover',e=>{if(!drag)return;const b=e.target.closest('.ch[data-id]');if(!b)return;e.preventDefault();clr();const r=b.getBoundingClientRect();b.classList.add(e.clientY<r.top+r.height/2?'dtop':'dbot')});
+   L.addEventListener('dragend',()=>{drag=null;clr()});
+   L.addEventListener('drop',async e=>{
+     const b=e.target.closest('.ch[data-id]');if(!drag||!b)return;e.preventDefault();
+     const r=b.getBoundingClientRect(),after=e.clientY>=r.top+r.height/2,from=drag,to=b.dataset.id;drag=null;clr();
+     if(from===to)return;
+     await save();
+     const ids=chapters.map(c=>c.id).filter(i=>i!==from);let k=ids.indexOf(to);if(after)k++;ids.splice(k,0,from);
+     const bt=db.batch();let n=0;
+     ids.forEach((i,ix)=>{const c=chapters.find(x=>x.id===i);if(c&&c.order!==ix+1){bt.update(db.doc(`novels/${novelId}/chapters/${i}`),{order:ix+1});n++}});
+     if(n)try{await bt.commit()}catch(err){fail(err)}
+   });}
   $('#bsp').onclick=async()=>{await save();chapId=null;updNovel();showSpaces();setPres()};
   $('#bfl').onclick=async()=>{await save();chapId=null;updNovel();showFiles();setPres()};
   $('#sp').onclick=e=>{const b=e.target.closest('button');if(!b)return;const m=+b.dataset.m;if(m){sprintEnd=Date.now()+m*60000;sprintW=0}else sprintEnd=0;$('#sp').dataset.s='';sprintUI()};
@@ -267,7 +314,7 @@ function buildNovel(){
   $('#addc').onclick=async()=>{
     await save();
     const order=chapters.length?Math.max(...chapters.map(c=>c.order||0))+1:1;
-    db.collection(`novels/${novelId}/chapters`).add({title:'Chapter '+order,content:'',order,by:myId,updatedBy:myId,updatedAt:Date.now()})
+    act('added Chapter '+order);db.collection(`novels/${novelId}/chapters`).add({title:'Chapter '+order,content:'',order,by:myId,updatedBy:myId,updatedAt:Date.now()})
       .then(r=>{pending=r.id}).catch(fail);
   };
 }
@@ -282,14 +329,14 @@ function updNovel(){
   if(document.activeElement!==$('#gi'))$('#gi').value=g||'';
   const q=($('#sq').value||'').trim().toLowerCase(),vis=q?chapters.filter(c=>((c.title||'')+' '+(c.content||'')).toLowerCase().includes(q)):chapters;
   const cxm=q?notes.filter(x=>((x.name||'')+' '+(x.body||'')).toLowerCase().includes(q)).map(x=>`<button class="ch" data-cx="1"><b>${esc(x.name)}</b><span class="badge">${esc(x.kind)}</span><small>In the codex</small></button>`).join(''):'';
-  $('#chl').innerHTML=(vis.length?vis.map(c=>`<button class="ch${c.id===chapId?' on':''}" data-id="${c.id}"><b>${esc(c.title)}</b><span class="badge ${c.status||'Draft'}">${c.status||'Draft'}</span>${c.openMarks?`<span class="badge" title="Open comments">💬 ${c.openMarks}</span>`:''}<small>${wc(c.content)} words · edited by ${esc(nm(c.updatedBy))}</small>${live(c.id).map(p=>`<small style="color:var(--acc)">● ${esc(p.presence.name||'Someone')}${p.presence.typing?' is typing…':' is here'}</small>`).join('')}${q?snip(c,q):''}${c.tags?`<small>${esc(c.tags)}</small>`:''}</button>`).join(''):(q?'':'<p class="muted">No chapters yet.</p>'))+cxm+(q&&!vis.length&&!cxm?'<p class="muted">No matches.</p>':'');
+  $('#chl').innerHTML=(vis.length?vis.map(c=>`<button class="ch${c.id===chapId?' on':''}" data-id="${c.id}" draggable="true"><b>${esc(c.title)}</b><span class="badge ${c.status||'Draft'}">${c.status||'Draft'}</span>${c.openMarks?`<span class="badge" title="Open comments">💬 ${c.openMarks}</span>`:''}<small>${wc(c.content)} words · edited by ${esc(nm(c.updatedBy))}</small>${live(c.id).map(p=>`<small style="color:var(--acc)">● ${esc(p.presence.name||'Someone')}${p.presence.typing?' is typing…':' is here'}</small>`).join('')}${q?snip(c,q):''}${c.tags?`<small>${esc(c.tags)}</small>`:''}</button>`).join(''):(q?'':'<p class="muted">No chapters yet.</p>'))+cxm+(q&&!vis.length&&!cxm?'<p class="muted">No matches.</p>':'');
   if(pending&&chapters.some(c=>c.id===pending)){const p=pending;pending=null;open(p)}
 }
 function subC(){
   unsubC=db.collection(`novels/${novelId}/chapters`).orderBy('order').onSnapshot(s=>{
     chapters=s.docs.map(d=>({id:d.id,...d.data()}));
     chLoaded=true;otRender();blkRender();
-    resolve(chapters.map(c=>c.updatedBy));if(tab==='files')showFiles();if(tab==='book')showBook();if(tab==='outline'&&!$('#ed').contains(document.activeElement))showOutline();
+    resolve(chapters.map(c=>c.updatedBy));if(tab==='board'&&!$('#ed').contains(document.activeElement))showBoard();if(tab==='files')showFiles();if(tab==='book')showBook();if(tab==='outline'&&!$('#ed').contains(document.activeElement))showOutline();
     updNovel();
     if(chapId){const c=chapters.find(x=>x.id===chapId);
       if(c){sync(c);const w=$('#caw');if(w&&w.dataset.id===chapId)attFill(w,db.doc(`novels/${novelId}/chapters/${chapId}`),()=>chapters)}else if(!pending){chapId=null;dirty=false;$('#ed').innerHTML='<p class="muted">That chapter was deleted.</p>'}}
@@ -299,32 +346,45 @@ function subC(){
 function open(id){
   const c=chapters.find(x=>x.id===id);if(!c)return;
   chapId=id;tab='ed';dirty=false;armed=false;savedAt=c.updatedAt;
-  $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><button id="sp">Spelling</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span></div>
-  <div class="warn" id="warn" hidden>Your co-author saved changes to this chapter. <button id="ld">Load their version</button> <small>(replaces your unsaved edits)</small></div>
+  $('#ed').innerHTML=`<div class="bar"><button id="mw" class="on2">Write</button><button id="mr">Read</button><span class="sp"></span><select id="sts"><option>Draft</option><option>Ready</option><option>Published</option></select><button id="fc">Focus</button><button id="fr">Find</button><button id="spb">Spelling</button><select id="dlf"><option value="">⬇ Download</option><option value="txt">Text (.txt)</option><option value="md">Markdown (.md)</option><option value="html">Web page (.html)</option></select><button id="hs">History</button><button id="up" title="Move up">↑</button><button id="dn" title="Move down">↓</button><span id="st" class="muted"></span></div>
+  <div class="warn" id="warn" hidden>Your co-author changed the same part you edited, so it couldn’t be merged automatically. <button id="ld">Load their version</button> <small>(your version is saved to Version history first)</small></div>
   <input id="ct" class="ctitle" placeholder="Chapter title"><div class="row" style="margin:0 0 8px"><input id="ctg" placeholder="Tags or content warnings (comma-separated)"><input id="cwt" type="number" min="0" placeholder="Chapter word goal" style="flex:0 1 170px"></div><div class="prog" id="cpg"></div><div class="row" id="frr" hidden style="margin:0 0 8px"><input id="fi" placeholder="Find"><input id="fo" placeholder="Replace with"><button id="fa">Replace all</button><small id="fn"></small></div><div class="note" id="spp" hidden><div class="nt"><b>Spelling</b><small id="sps" style="flex:1"></small><label class="nt"><input type="checkbox" id="spc" checked style="width:auto"> <small>Skip capitalized words (names)</small></label><button id="spr">Re-check</button><button id="spx">Close</button></div><div id="spl" style="margin-top:8px"></div></div><div class="tb" id="tb"><button data-c="undo" title="Undo (Ctrl+Z)">↶</button><button data-c="redo" title="Redo (Ctrl+Y)">↷</button><button data-c="bold" title="Bold (Ctrl+B)"><b>B</b></button><button data-c="italic" title="Italic (Ctrl+I)"><i>I</i></button><button data-c="underline" title="Underline (Ctrl+U)"><u>U</u></button><select id="ff"><option value="">Font</option>${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="fz"><option value="">Size</option>${[12,14,16,18,20,24,28,36,48].map(s=>`<option>${s}</option>`).join('')}</select><button data-c="justifyLeft" title="Align left">⇤</button><button data-c="justifyCenter" title="Center">↔</button><button data-c="justifyRight" title="Align right">⇥</button><button data-c="justifyFull" title="Justify">☰</button><select id="fk"><option value="">Color</option>${COLORS.map(([n,v])=>`<option value="${v}">${n}</option>`).join('')}</select><button data-c="hr" title="Insert a scene break">* * *</button><select id="hl"><option value="">Highlight</option>${HLO}</select><select id="hp"><option value="">¶ Highlight</option>${HLO}</select><button id="cmt" title="Comment on selected text">💬</button><button data-c="removeFormat" title="Clear formatting">Clear</button></div><div class="row" id="cmr" hidden style="margin:0 0 8px"><input id="cmv" placeholder="Comment on the selected text…"><button class="pri" id="cmo">Comment</button><button id="cmx">Cancel</button></div><div id="cb" contenteditable="true" spellcheck="true" lang="en" autocorrect="on" autocapitalize="sentences" data-ph="Once upon a time…"></div><div id="rd" class="read" hidden></div><div id="caw" data-id="${id}"><div class="at"></div></div>
   <div class="foot"><span id="wcn"></span><span id="lb" class="muted"></span></div>
   <div class="cm" id="vh" hidden><h3>Version history</h3><button id="sv">Save a version now</button><div id="vl" style="margin-top:10px"></div></div>
   <div class="cm"><h3>Linked mentions</h3><div id="blkl"></div></div>
   <div class="cm"><h3>Inline comments</h3><div id="mkl"></div></div>
-  <div class="cm"><h3>Notes between co-authors</h3><div id="cml"></div><div class="row"><input id="cmi" placeholder="Leave a note about this chapter…"><button id="cmb">Send</button></div></div>`;
+  <div class="cm"><h3>Notes between co-authors</h3><div id="cml"></div><div class="row"><input id="cmi" placeholder="Leave a note about this chapter…"><button id="cmb">Send</button></div></div>
+  <details class="dz" id="cdz" hidden><summary>Danger zone</summary><p class="muted"><small>Deleting this chapter also removes its version history, comments and inline notes. This can’t be undone, so download it first if you might want it later.</small></p><button class="ndel" id="cdl">🗑 Delete this chapter</button></details>`;
   fill(c);
   attFill($('#caw'),db.doc(`novels/${novelId}/chapters/${id}`),()=>chapters);
-  subMk(id);subCm(id);subVh(id);const edit=()=>{dirty=true;$('#st').textContent='Unsaved…';count();clearTimeout(timer);typ();timer=setTimeout(save,600)};
-  $('#ct').oninput=edit;$('#cb').oninput=edit;$('#sts').onchange=()=>{edit();save()};$('#fc').onclick=()=>document.body.classList.add('focus');wireTb();$('#ctg').oninput=edit;$('#cwt').oninput=edit;
+  subMk(id);subCm(id);subVh(id);const edit=()=>{dirty=true;svTick();$('#st').textContent='Unsaved…';count();clearTimeout(timer);typ();timer=setTimeout(save,600)};
+  $('#ct').oninput=edit;$('#cb').oninput=edit;$('#sts').onchange=()=>{edit();save()};$('#fc').onclick=()=>{fsBase=wc($('#cb').value);try{$('#fsg').value=localStorage.getItem('ink-fsg')||''}catch(_){}document.body.classList.add('focus');fsTick()};wireTb();$('#ctg').oninput=edit;$('#cwt').oninput=edit;
   $('#hs').onclick=()=>{$('#vh').hidden=!$('#vh').hidden};
   $('#fr').onclick=()=>{const r=$('#frr');r.hidden=!r.hidden;if(!r.hidden)$('#fi').focus()};
   $('#fi').oninput=()=>{const q=$('#fi').value;$('#fn').textContent=q?(($('#cb').value.match(new RegExp(rxEsc(q),'gi'))||[]).length+' found'):''};
   $('#fa').onclick=replAll;
-  $('#sp').onclick=()=>{const p=$('#spp');p.hidden=!p.hidden;if(!p.hidden)spellRun()};$('#spr').onclick=spellRun;$('#spx').onclick=()=>{$('#spp').hidden=true};$('#spc').onchange=spellRun;
+  $('#spb').onclick=()=>{const p=$('#spp');p.hidden=!p.hidden;if(!p.hidden)spellRun()};$('#spr').onclick=spellRun;$('#spx').onclick=()=>{$('#spp').hidden=true};$('#spc').onchange=spellRun;
   $('#dlf').onchange=e=>{const f=e.target.value;e.target.selectedIndex=0;if(!f)return;const t=$('#ct').value.trim()||'chapter';dlSave(slug(t)+'.'+f,chFile(f,t,$('#cb').value,$('#cb').html))};
   $('#sv').onclick=()=>snap('Saved version').then(()=>toast('Version saved')).catch(fail);$('#up').onclick=()=>move(-1);$('#dn').onclick=()=>move(1);
   $('#mw').onclick=()=>mode(false);$('#mr').onclick=()=>mode(true);
-  $('#ld').onclick=()=>{const x=chapters.find(y=>y.id===chapId);if(x){dirty=false;savedAt=x.updatedAt;fill(x);$('#warn').hidden=true}};
+  $('#ld').onclick=async()=>{const x=chapters.find(y=>y.id===chapId);if(x){try{await snap('Your edits before loading co-author’s version')}catch(e){}dirty=false;savedAt=x.updatedAt;fill(x);$('#warn').hidden=true}};
   updNovel();trk();blkRender();linkWire();
+  {const cb=$('#cb');
+   cb.addEventListener('keydown',e=>{
+     if(e.key!=='Tab'||e.ctrlKey||e.metaKey||e.altKey||lkBox)return;
+     e.preventDefault();
+     if(e.shiftKey){try{const s=getSelection();if(s.isCollapsed){s.modify('extend','backward','character');if(s.toString()==='\u2003')document.execCommand('delete');else s.collapseToEnd()}}catch(_){}}
+     else document.execCommand('insertText',false,'\u2003\u2003');
+   });
+   cb.addEventListener('input',()=>{if(document.body.classList.contains('focus')){fsTick();fsType()}});
+   cb.addEventListener('keyup',e=>{if(document.body.classList.contains('focus')&&(e.key==='ArrowUp'||e.key==='ArrowDown'))fsType()});
+   $('#fsg').onchange=()=>{try{localStorage.setItem('ink-fsg',$('#fsg').value)}catch(_){}fsTick()};
+   baseHtml=cb.html;svTick();}
+  {const dz=$('#cdz'),b=$('#cdl');dz.hidden=!canRen(c);b.onclick=()=>{if(b.dataset.a){delChapter(id)}else{b.dataset.a=1;b.textContent='Click again to delete forever';setTimeout(()=>{if(b.isConnected){delete b.dataset.a;b.textContent='🗑 Delete this chapter'}},4000)}}}
 }
 function fill(c){
   $('#ct').value=c.title||'';$('#ct').readOnly=!canRen(c)||!$('#rd').hidden;$('#ct').title=canRen(c)?'':'Only the person who started this chapter can rename it';rte($('#cb'));if(c.html)$('#cb').html=c.html;else $('#cb').value=c.content||'';$('#ctg').value=c.tags||'';$('#cwt').value=c.target||'';$('#sts').value=c.status||'Draft';lastWc=wc(c.content);
-  $('#lb').textContent='Last edited by '+nm(c.updatedBy);$('#st').textContent='';count();
+  $('#lb').textContent='Last edited by '+nm(c.updatedBy);$('#st').textContent='';count();baseHtml=$('#cb').html;
 }
 function count(){
   const t=$('#cb').value,w=wc(t),dl=wc((t.match(/["“][^"”]*["”]/g)||[]).join(' '));
@@ -339,7 +399,7 @@ function mode(read){
 function sync(c){
   if(!$('#ct')||c.updatedAt===savedAt)return;
   if(!dirty){savedAt=c.updatedAt;fill(c);$('#st').textContent='Updated by '+nm(c.updatedBy)}
-  else $('#warn').hidden=false;
+  else if(!mergeIn(c))$('#warn').hidden=false;
 }
 async function save(){
   if(!dirty||!chapId)return;
@@ -348,7 +408,8 @@ async function save(){
   const data={title:$('#ct').value.trim()||'Untitled chapter',content:$('#cb').value,html:$('#cb').html,tags:$('#ctg').value.trim(),target:+$('#cwt').value||0,status:$('#sts').value,updatedBy:myId,updatedAt:at};
   if(!canRen(chapters.find(x=>x.id===id)))delete data.title;
   savedAt=at;dirty=false;
-  try{await db.doc(`novels/${novelId}/chapters/${id}`).update(data);const dw=wc(data.content)-lastWc;lastWc=wc(data.content);if(dw>0){logWords(dw);if(sprintEnd)sprintW+=dw}const s=$('#st');if(s)s.textContent='Saved'}
+  const prevSt=(chapters.find(x=>x.id===id)||{}).status||'Draft';
+  try{await db.doc(`novels/${novelId}/chapters/${id}`).update(data);act('edited “'+(data.title||'a chapter')+'”','e:'+id);if(data.status!==prevSt)act('marked “'+(data.title||'a chapter')+'” '+data.status);const dw=wc(data.content)-lastWc;lastWc=wc(data.content);if(dw>0){logWords(dw);if(sprintEnd)sprintW+=dw}const s=$('#st');if(s)s.textContent='Saved';baseHtml=data.html;svAt=Date.now();svTick()}
   catch(e){dirty=true;fail(e)}
 }
 
@@ -392,6 +453,7 @@ async function spellRun(){
   try{await loadTypo()}catch(e){st.textContent='Could not load the dictionary. Check your connection and try again.';return}
   if(my!==spRun||!$('#spl'))return;
   const skipCap=$('#spc').checked,mine=new Set(myWords().map(w=>w.toLowerCase())),seen=new Map();
+  notes.forEach(n=>String(n.name||'').split(/[^A-Za-z'’]+/).forEach(w=>{if(w)mine.add(w.replace(/’/g,"'").toLowerCase())}));
   for(const m of $('#cb').value.matchAll(/[A-Za-z]+(?:['’][A-Za-z]+)*/g)){
     const w=m[0],k=w.replace(/’/g,"'");
     if(w.length<2||w===w.toUpperCase()||(skipCap&&/^[A-Z]/.test(w))||mine.has(k.toLowerCase())||spIgn.has(k.toLowerCase()))continue;
@@ -471,7 +533,7 @@ function showBook(){
   $('#dr').onchange=e=>{drafts=e.target.checked;showBook()};
   $('#bk').onclick=async()=>{
     const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');
-    const data=JSON.stringify({exportedAt:new Date().toISOString(),novel:n,chapters,codex:notes,timeline:evs,notes:memos,pages,spaces},null,2);
+    const data=JSON.stringify({exportedAt:new Date().toISOString(),novel:n,chapters,codex:notes,timeline:evs,notes:memos,vault,pages,spaces},null,2);
     try{await dl.save({filename:(n.title||'novel').replace(/[^\w-]+/g,'-')+'-backup.json',data})}catch(e){if(!e||e.code!=='declined')fail(e)}
   };
   $('#eb').onclick=async()=>{
@@ -580,8 +642,206 @@ async function delCol(path,subs){
 async function wipeNovel(id){
   const base='novels/'+id;
   await delCol(base+'/chapters',['comments','versions','marks']);
-  for(const c of ['notes','stats','events','memos','spaces','pages'])await delCol(base+'/'+c);
+  for(const c of ['notes','stats','events','memos','spaces','pages','vault','activity'])await delCol(base+'/'+c);
   await db.doc(base).delete();
+}
+
+// ---- Merge a co-author's edits into yours, paragraph by paragraph ----
+let baseHtml='',svAt=0,fsBase=0;
+function lcsPairs(a,b){
+  const n=a.length,m=b.length,dp=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const out=[];let i=0,j=0;
+  while(i<n&&j<m){if(a[i]===b[j]){out.push([i,j]);i++;j++}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++}
+  return out;
+}
+function merge3(base,mine,theirs){
+  if(base.length*Math.max(mine.length,theirs.length)>4e6)return null;
+  const A=new Map(lcsPairs(base,mine)),B=new Map(lcsPairs(base,theirs)),anc=[];
+  A.forEach((mi,bi)=>{if(B.has(bi))anc.push([bi,mi,B.get(bi)])});
+  anc.sort((x,y)=>x[0]-y[0]);anc.push([base.length,mine.length,theirs.length]);
+  const eq=(x,y)=>x.length===y.length&&x.every((v,k)=>v===y[k]),out=[];let pb=0,pm=0,pt=0;
+  for(const [bi,mi,ti] of anc){
+    const cb=base.slice(pb,bi),cm=mine.slice(pm,mi),ct=theirs.slice(pt,ti);
+    if(eq(cm,cb))out.push(...ct);else if(eq(ct,cb)||eq(cm,ct))out.push(...cm);else return null;
+    if(bi<base.length)out.push(base[bi]);
+    pb=bi+1;pm=mi+1;pt=ti+1;
+  }
+  return out;
+}
+const blocksOf=h=>{const d=new DOMParser().parseFromString('<body>'+(h||'')+'</body>','text/html').body;return [...d.childNodes].map(n=>n.nodeType===1?n.outerHTML:(n.textContent.trim()?esc(n.textContent):'')).filter(Boolean)};
+function mergeIn(c){
+  try{
+    if(!c.html||!baseHtml)return false;
+    const cb=$('#cb'),B=blocksOf(baseHtml),M=blocksOf(cb.html),T=blocksOf(clean(c.html,1)),out=merge3(B,M,T);
+    if(!out)return false;
+    const s=getSelection(),md=wc(cb.value)-lastWc;let keep=null;
+    if(s.rangeCount&&cb.contains(s.anchorNode)&&s.anchorNode!==cb){
+      let n=s.anchorNode;while(n&&n.parentNode!==cb)n=n.parentNode;
+      if(n){const r=document.createRange();r.setStart(n,0);r.setEnd(s.anchorNode,s.anchorOffset);keep={html:n.outerHTML,off:r.toString().length}}
+    }
+    cb.html=out.join('');
+    if(keep){
+      const el=[...cb.children].find(x=>x.outerHTML===keep.html);
+      if(el){
+        const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let left=keep.off,t=null,last=null;
+        while((t=tw.nextNode())){last=t;if(left<=t.nodeValue.length){s.collapse(t,left);last=null;break}left-=t.nodeValue.length}
+        if(last)s.collapse(last,last.nodeValue.length);
+      }
+    }
+    savedAt=c.updatedAt;baseHtml=clean(c.html,1);dirty=true;count();
+    lastWc=wc(cb.value)-md;
+    $('#st').textContent='Merged '+nm(c.updatedBy)+'’s changes';
+    clearTimeout(timer);timer=setTimeout(save,600);
+    return true;
+  }catch(e){return false}
+}
+// ---- Save status chip and focus-mode helpers ----
+function svTick(){
+  let el=$('#svc');
+  if(!chapId||!$('#cb')){if(el)el.hidden=true;return}
+  if(!el){el=document.createElement('div');el.id='svc';document.body.appendChild(el)}
+  el.hidden=false;
+  const s=Math.round((Date.now()-svAt)/1000);
+  el.textContent=dirty?'● Unsaved changes…':svAt?'✓ Saved '+(s<5?'just now':s<60?s+'s ago':Math.round(s/60)+' min ago'):'✓ All changes saved';
+}
+setInterval(svTick,5000);
+function fsTick(){
+  const el=$('#fsw'),cb=$('#cb');if(!el||!cb)return;
+  const w=Math.max(0,wc(cb.value)-fsBase),g=+($('#fsg').value||0);
+  el.textContent=g?w+' / '+g+' words'+(w>=g?' ✓':''):'+'+w+' words';
+}
+function fsType(){
+  const t=$('#fty');if(!t||!t.checked)return;
+  const s=getSelection(),cb=$('#cb');if(!s.rangeCount||!cb||!cb.contains(s.anchorNode))return;
+  const r=s.getRangeAt(0).cloneRange();r.collapse(true);
+  let rc=r.getClientRects()[0];
+  if(!rc||(!rc.top&&!rc.bottom)){const e=s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement;rc=e&&e.getBoundingClientRect()}
+  if(!rc)return;
+  const d=rc.top-innerHeight*0.45;if(Math.abs(d)>30)scrollBy({top:d,behavior:'smooth'});
+}
+// ---- Activity feed ----
+let acts=[],unsubAc=null;const actLast={};
+function act(text,key){
+  if(!novelId||!myId)return;
+  if(key){const n=Date.now();if(n-(actLast[key]||0)<15*60000)return;actLast[key]=n}
+  db.collection(`novels/${novelId}/activity`).add({text,by:myId,at:Date.now()}).catch(()=>{});
+}
+function subAct(){
+  const id=novelId;
+  unsubAc=db.collection(`novels/${id}/activity`).orderBy('at','desc').limit(40).onSnapshot(s=>{
+    acts=s.docs.map(d=>({id:d.id,...d.data()}));resolve(acts.map(a=>a.by));
+    if(tab==='activity'&&$('#ed'))showActivity();
+  },()=>{});
+}
+const agoT=t=>{const s=Math.max(0,Math.round((Date.now()-t)/1000));return s<60?'just now':s<3600?Math.round(s/60)+' min ago':s<86400?Math.round(s/3600)+' h ago':new Date(t).toLocaleDateString()};
+function showActivity(){
+  tab='activity';trk();
+  $('#ed').innerHTML='<h2>Activity</h2><p class="muted">What you and your co-author have been up to lately.</p>'+(acts.length?acts.map(a=>`<div class="act"><b>${esc(nm(a.by))}</b> ${esc(a.text)} <small class="muted">· ${agoT(a.at)}</small></div>`).join(''):'<p class="muted">Nothing yet. New chapters, edits and status changes will show up here.</p>');
+}
+// ---- Status board ----
+function showBoard(){
+  tab='board';trk();
+  const cols=['Draft','Ready','Published'];
+  $('#ed').innerHTML='<h2>Board</h2><p class="muted">Where every chapter stands. Use a chapter’s dropdown to change its status.</p><div class="board" id="brd">'+cols.map(s=>{
+    const l=chapters.filter(c=>(c.status||'Draft')===s);
+    return `<div class="bcol"><h3>${s} <span class="badge ${s}">${l.length}</span></h3><small class="muted">${l.reduce((a,c)=>a+wc(c.content),0).toLocaleString()} words</small>`
+      +(l.length?l.map(c=>`<div class="note" data-id="${c.id}" style="margin-top:8px"><button class="ch bo"><b>${esc(c.title)}</b><small>${wc(c.content)} words${c.tags?' · '+esc(c.tags):''}</small></button><select class="bs">${cols.map(x=>`<option${x===s?' selected':''}>${x}</option>`).join('')}</select></div>`).join(''):'<p class="muted"><small>No chapters.</small></p>')+'</div>';
+  }).join('')+'</div>';
+  const b=$('#brd');
+  b.onclick=async e=>{const x=e.target.closest('.bo');if(!x)return;await save();open(x.closest('.note').dataset.id)};
+  b.onchange=e=>{
+    const sel=e.target.closest('.bs');if(!sel)return;
+    const id=sel.closest('.note').dataset.id,c=chapters.find(z=>z.id===id),st=sel.value;sel.blur();
+    db.doc(`novels/${novelId}/chapters/${id}`).update({status:st}).catch(fail);
+    if(c)act('moved “'+(c.title||'a chapter')+'” to '+st);
+  };
+}
+
+
+// ---- Dictionary tab (free dictionaryapi.dev + Datamuse, no key needed) ----
+let dcSel='',dcWord='',dcSeq=0;const dcCache=new Map();
+const dcHist=()=>{try{const a=JSON.parse(localStorage.getItem('ink-lookups')||'[]');return Array.isArray(a)?a.filter(x=>typeof x==='string').slice(0,12):[]}catch(e){return[]}};
+const dcPush=w=>{try{localStorage.setItem('ink-lookups',JSON.stringify([w,...dcHist().filter(x=>x!==w)].slice(0,12)))}catch(e){}};
+async function dcGet(url){const r=await fetch(url);if(r.status===404)return null;if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+const dcClean=raw=>String(raw||'').trim().toLowerCase().replace(/’/g,"'").replace(/[^a-z' -]/g,'').replace(/\s+/g,' ').slice(0,40);
+async function dcLookup(raw){
+  const w=dcClean(raw);if(!w)return null;
+  if(dcCache.has(w))return dcCache.get(w);
+  const q=encodeURIComponent(w),dm='https://api.datamuse.com/';
+  const [def,syn,ant,rhy,sug]=await Promise.all([
+    dcGet('https://api.dictionaryapi.dev/api/v2/entries/en/'+q).catch(()=>undefined),
+    dcGet(dm+'words?rel_syn='+q+'&max=16').catch(()=>[]),
+    dcGet(dm+'words?rel_ant='+q+'&max=12').catch(()=>[]),
+    dcGet(dm+'words?rel_rhy='+q+'&max=20').catch(()=>[]),
+    dcGet(dm+'sug?s='+q+'&max=6').catch(()=>[])
+  ]);
+  const ws=a=>(Array.isArray(a)?a:[]).map(x=>x&&x.word).filter(Boolean);
+  const r={w,def,syn:ws(syn),ant:ws(ant),rhy:ws(rhy),sug:ws(sug).filter(x=>x!==w)};
+  if(def!==undefined)dcCache.set(w,r);
+  return r;
+}
+const dcChips=(l,max)=>l.slice(0,max).map(x=>`<button class="dcw" data-w="${esc(x)}">${esc(x)}</button>`).join('');
+function dcHtml(r){
+  if(!r)return '';
+  if(r.def===undefined&&!r.syn.length&&!r.rhy.length)return '<p class="muted">Couldn’t reach the dictionary service. Check your connection and try again.</p>';
+  const es=Array.isArray(r.def)?r.def:[];let h='';
+  if(es.length){
+    const e0=es[0],ph=(e0.phonetics||[]).find(p=>p&&typeof p.audio==='string'&&/^https:\/\//.test(p.audio)),
+      txt=e0.phonetic||((e0.phonetics||[]).find(p=>p&&p.text)||{}).text||'';
+    h+=`<div class="nt" style="margin:8px 0"><h3 style="margin:0">${esc(e0.word||r.w)}</h3>${txt?`<span class="muted">${esc(txt)}</span>`:''}${ph?`<button id="dcau" data-a="${esc(ph.audio)}" title="Hear it">🔊</button>`:''}</div>`;
+    es.forEach(en=>(en.meanings||[]).forEach(m=>{
+      h+=`<div class="note"><b><i>${esc(m.partOfSpeech||'')}</i></b><ol style="margin:6px 0 0;padding-left:20px">${(m.definitions||[]).slice(0,5).map(d=>`<li>${esc(d.definition||'')}${d.example?`<br><small class="muted">“${esc(d.example)}”</small>`:''}</li>`).join('')}</ol></div>`;
+    }));
+  }else{
+    h+=`<p class="muted">No definition found for “${esc(r.w)}”.</p>`+(r.sug.length?`<p>Did you mean: ${dcChips(r.sug,6)}</p>`:'');
+  }
+  const own=es.flatMap(en=>(en.meanings||[]).flatMap(m=>[...(m.synonyms||[]),...(m.definitions||[]).flatMap(d=>d.synonyms||[])])),
+    oan=es.flatMap(en=>(en.meanings||[]).flatMap(m=>[...(m.antonyms||[]),...(m.definitions||[]).flatMap(d=>d.antonyms||[])])),
+    uni=l=>[...new Set(l.filter(x=>typeof x==='string'&&x&&x.toLowerCase()!==r.w))];
+  const sec=(t,l,n)=>l.length?`<div class="note"><b>${t}</b><div style="margin-top:6px">${dcChips(l,n)}</div></div>`:'';
+  return h+sec('Synonyms',uni([...own,...r.syn]),24)+sec('Antonyms',uni([...oan,...r.ant]),12)+sec('Rhymes',uni(r.rhy),20);
+}
+function showDict(w){
+  tab='dictionary';trk();
+  $('#ed').innerHTML=`<h2>Dictionary</h2><p class="muted">Meanings, synonyms, antonyms and rhymes. Tip: select a word in a chapter, then click Dictionary to look it up straight away.</p><div class="row"><input id="dci" placeholder="Look up a word…" value="${esc(w||dcWord)}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="pri" id="dcb">Look up</button></div><div id="dch" style="margin:8px 0"></div><div id="dcr"></div>`;
+  const hist=()=>{const el=$('#dch');if(el)el.innerHTML=dcHist().length?'<small class="muted">Recent: </small>'+dcChips(dcHist(),12):''};
+  const go=async x=>{
+    const word=dcClean(x);if(!word)return;
+    dcWord=word;$('#dci').value=word;const my=++dcSeq;
+    $('#dcr').innerHTML='<p class="muted">Looking up…</p>';
+    let r=null;try{r=await dcLookup(word)}catch(e){}
+    if(my!==dcSeq||!$('#dcr'))return;
+    if(r&&r.def!==undefined)dcPush(word);
+    $('#dcr').innerHTML=dcHtml(r)||'<p class="muted">Couldn’t reach the dictionary service. Check your connection and try again.</p>';
+    hist();
+  };
+  $('#dcb').onclick=()=>go($('#dci').value);
+  $('#dci').onkeydown=e=>{if(e.key==='Enter')go($('#dci').value)};
+  const chip=e=>{const b=e.target.closest('.dcw');if(b)go(b.dataset.w)};
+  $('#dch').onclick=chip;
+  $('#dcr').onclick=e=>{
+    chip(e);
+    const a=e.target.closest('#dcau');
+    if(a&&/^https:\/\//.test(a.dataset.a||'')){try{new Audio(a.dataset.a).play()}catch(_){}}
+  };
+  hist();
+  const start=w||dcWord;
+  if(start)go(start);else $('#dci').focus();
+}
+
+// ---- Delete one chapter (the person who started it, or who started the novel) ----
+async function delChapter(id){
+  const c=chapters.find(x=>x.id===id);
+  if(!c||!canRen(c))return toast('Only the person who started this chapter or the novel can delete it.');
+  clearTimeout(timer);dirty=false;armed=false;
+  toast('Deleting “'+(c.title||'chapter')+'”…');
+  const base='novels/'+novelId+'/chapters/'+id;
+  try{
+    for(const sub of ['comments','versions','marks'])await delCol(base+'/'+sub);
+    await db.doc(base).delete();
+    toast('Chapter deleted.');act('deleted “'+(c.title||'a chapter')+'”');
+  }catch(e){fail(e)}
 }
 async function delNovel(id){
   const n=novels.find(x=>x.id===id);
@@ -786,7 +1046,7 @@ document.addEventListener('keydown',e=>{
 });
 // ---- Obsidian-style tabs: chapters and views stay open side by side ----
 let otabs=[],chLoaded=false;
-const OTV={codex:['📖','Codex'],book:['📚','Read novel'],outline:['🧾','Outline'],timeline:['⏳','Timeline'],memos:['🗒','Notes'],spaces:['🗂','Spaces'],files:['📎','Files']};
+const OTV={codex:['📖','Codex'],book:['📚','Read novel'],outline:['🧾','Outline'],timeline:['⏳','Timeline'],memos:['🗒','Notes'],spaces:['🗂','Spaces'],files:['📎','Files'],vault:['🧠','Vault'],board:['📋','Board'],activity:['🔔','Activity'],dictionary:['📘','Dictionary']};
 const curKey=()=>tab==='ed'?(chapId?'c:'+chapId:null):tab;
 const otKey=()=>'ink-tabs-'+novelId;
 function otSave(){try{localStorage.setItem(otKey(),JSON.stringify(otabs))}catch(e){}}
@@ -809,7 +1069,7 @@ async function otGo(k){
   await save();
   if(k.startsWith('c:'))return open(k.slice(2));
   chapId=null;updNovel();
-  const f={codex:showCodex,book:showBook,outline:showOutline,timeline:showTimeline,memos:showMemos,spaces:showSpaces,files:showFiles}[k];
+  const f={codex:showCodex,book:showBook,outline:showOutline,timeline:showTimeline,memos:showMemos,spaces:showSpaces,files:showFiles,vault:showVault,board:showBoard,activity:showActivity,dictionary:showDict}[k];
   if(f)f();
   setPres();
 }
@@ -963,6 +1223,244 @@ async function subMemos(){
   if(id!==novelId)u();else unsubPm=u;
   if(tab==='memos'&&memoTab==='private')showMemos();
 }
+// ---- Vault: linked notes, Obsidian-style ----
+let vault=[],unsubVt=null,vtId=null,vtView='notes',vtRead=false,vtQ='',vtTag='',vtLocal=false,vtBusy=false;
+const WL=/\[\[([^\[\]|#\n]+?)(#[^\[\]|\n]*)?(?:\|([^\[\]\n]*))?\]\]/g;
+const vtClean=t=>String(t==null?'':t).replace(/[\[\]|#^\\\/:*?"<>]/g,'').replace(/\s+/g,' ').trim();
+const vtKey=t=>vtClean(t).toLowerCase();
+const vtFile=v=>vtClean(v.title)||'untitled';
+const vtRef=id=>db.doc(`novels/${novelId}/vault/${id}`);
+const vtUnique=(t,skip)=>{const base=vtClean(t)||'Untitled';let n=base,i=1;while(vault.some(v=>v.id!==skip&&vtKey(v.title)===vtKey(n)))n=base+' '+(++i);return n};
+const vtLinks=b=>{const out=[],seen=new Set();String(b||'').replace(WL,(m,t)=>{const r=vtClean(t),k=r.toLowerCase();if(k&&!seen.has(k)){seen.add(k);out.push(r)}return m});return out};
+const vtTags=b=>{const out=[];String(b||'').replace(/(^|\s)#([A-Za-z][\w\/-]*)/g,(m,p,t)=>{t=t.toLowerCase();if(!out.includes(t))out.push(t);return m});return out};
+function vtIndex(){
+  const byKey=new Map(vault.map(v=>[vtKey(v.title),v])),out=new Map(),back=new Map();
+  vault.forEach(v=>{
+    const ls=vtLinks(v.body).filter(r=>vtKey(r)!==vtKey(v.title));out.set(v.id,ls);
+    ls.forEach(r=>{const t=byKey.get(vtKey(r));if(t){if(!back.has(t.id))back.set(t.id,[]);back.get(t.id).push(v)}});
+  });
+  return {byKey,out,back};
+}
+function vtMd(body,idx){
+  const inl=s=>esc(s).split(/(`[^`]+`)/).map((p,k)=>{
+    if(k%2)return '<code>'+p.slice(1,-1)+'</code>';
+    return p
+      .replace(/\[([^\[\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/\[\[([^\[\]|#\n]+?)(?:#[^\[\]|\n]*)?(?:\|([^\[\]\n]*))?\]\]/g,(m,t,a)=>{const ex=idx.byKey.has(vtKey(t.replace(/&amp;/g,'&')));return '<a href="#" class="vwl'+(ex?'':' vmiss')+'" data-t="'+t+'">'+(a||t)+'</a>'})
+      .replace(/(^|\s)#([A-Za-z][\w\/-]*)/g,(m,q,t)=>q+'<a href="#" class="vtag" data-t="'+t.toLowerCase()+'">#'+t+'</a>')
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g,'$1<em>$2</em>')
+      .replace(/~~([^~]+)~~/g,'<del>$1</del>')
+      .replace(/==([^=]+)==/g,'<mark>$1</mark>');
+  }).join('');
+  const lines=String(body||'').split('\n'),out=[];let i=0;
+  const STOP=/^(#{1,6}\s|```|>|\s*([-*+]|\d+\.)\s+|\s*(---|\*\*\*|___)\s*$)/;
+  while(i<lines.length){
+    const L=lines[i];let m;
+    if(/^```/.test(L)){const c=[];i++;while(i<lines.length&&!/^```/.test(lines[i]))c.push(lines[i++]);i++;out.push('<pre><code>'+esc(c.join('\n'))+'</code></pre>');continue}
+    if((m=/^(#{1,6})\s+(.*)$/.exec(L))){out.push('<h'+m[1].length+'>'+inl(m[2])+'</h'+m[1].length+'>');i++;continue}
+    if(/^\s*(---|\*\*\*|___)\s*$/.test(L)){out.push('<hr>');i++;continue}
+    if(/^>\s?/.test(L)){const q=[];while(i<lines.length&&/^>\s?/.test(lines[i]))q.push(lines[i++].replace(/^>\s?/,''));out.push('<blockquote>'+q.map(inl).join('<br>')+'</blockquote>');continue}
+    if(/^\s*([-*+]|\d+\.)\s+/.test(L)){
+      const ord=/^\s*\d+\./.test(L),items=[];
+      while(i<lines.length&&(m=/^(\s*)([-*+]|\d+\.)\s+(.*)$/.exec(lines[i]))){
+        const d=Math.min(4,Math.floor(m[1].replace(/\t/g,'  ').length/2));let t=m[3],cb='';
+        const tm=/^\[( |x|X)\]\s+(.*)$/.exec(t);
+        if(tm){cb='<input type="checkbox" class="vck" data-l="'+i+'"'+(tm[1]===' '?'':' checked')+'> ';t=tm[2]}
+        items.push('<li style="margin-left:'+(d*18)+'px">'+cb+inl(t)+'</li>');i++;
+      }
+      out.push((ord?'<ol>':'<ul>')+items.join('')+(ord?'</ol>':'</ul>'));continue;
+    }
+    if(!L.trim()){i++;continue}
+    const p=[];while(i<lines.length&&lines[i].trim()&&!STOP.test(lines[i]))p.push(lines[i++]);
+    if(!p.length){p.push(lines[i++])}
+    out.push('<p>'+p.map(inl).join('<br>')+'</p>');
+  }
+  return out.join('')||'<p class="muted">This note is empty.</p>';
+}
+function vtLayout(nodes,edges,W,H){
+  const N=nodes.length,byId=new Map(nodes.map(n=>[n.id,n]));
+  nodes.forEach((n,i)=>{const a=2*Math.PI*i/Math.max(1,N);n.x=W/2+Math.cos(a)*Math.min(W,H)/3;n.y=H/2+Math.sin(a)*Math.min(W,H)/3;n.d=0});
+  edges.forEach(([a,b])=>{byId.get(a).d++;byId.get(b).d++});
+  const k=Math.sqrt(W*H/Math.max(N,1))*0.7,IT=250;
+  for(let it=0;it<IT;it++){
+    const cool=1-it/IT;nodes.forEach(n=>{n.fx=0;n.fy=0});
+    for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+      const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+0.01;const d=Math.sqrt(d2),f=k*k/d2;
+      dx*=f;dy*=f;a.fx+=dx;a.fy+=dy;b.fx-=dx;b.fy-=dy;
+    }
+    edges.forEach(([ai,bi])=>{
+      const a=byId.get(ai),b=byId.get(bi);const dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy)+0.01,f=d/k;
+      a.fx-=dx*f;a.fy-=dy*f;b.fx+=dx*f;b.fy+=dy*f;
+    });
+    nodes.forEach(n=>{
+      n.fx+=(W/2-n.x)*0.02;n.fy+=(H/2-n.y)*0.02;
+      const m=Math.sqrt(n.fx*n.fx+n.fy*n.fy)||1,s=Math.min(m,10*cool+0.5);
+      n.x+=n.fx/m*s;n.y+=n.fy/m*s;
+    });
+  }
+  nodes.forEach(n=>{n.x=Math.max(30,Math.min(W-30,n.x));n.y=Math.max(20,Math.min(H-24,n.y))});
+}
+async function vtRename(id,raw){
+  const n=vault.find(v=>v.id===id);if(!n)return raw;
+  const t=vtUnique(raw||'Untitled',id);if(t===n.title)return t;
+  const ok=vtKey(n.title),b=db.batch();
+  b.update(vtRef(id),{title:t,at:Date.now()});
+  vault.forEach(v=>{
+    if(v.id===id)return;
+    const nb=String(v.body||'').replace(WL,(m,x,h,a)=>vtKey(x)===ok?'[['+t+(h||'')+(a!=null?'|'+a:'')+']]':m);
+    if(nb!==String(v.body||''))b.update(vtRef(v.id),{body:nb});
+  });
+  try{await b.commit()}catch(e){fail(e);return n.title}
+  return t;
+}
+async function vtNew(title,body){
+  if(vtBusy)return;vtBusy=true;
+  try{
+    const r=await db.collection(`novels/${novelId}/vault`).add({title:vtUnique(title),body:body||'',by:myId,at:Date.now()});
+    vtId=r.id;vtView='notes';vtRead=false;if(tab==='vault')showVault(true);
+  }catch(e){fail(e)}
+  vtBusy=false;
+}
+function subVault(){
+  const id=novelId;
+  unsubVt=db.collection(`novels/${id}/vault`).onSnapshot(s=>{
+    vault=s.docs.map(d=>({id:d.id,...d.data()}));resolve(vault.map(v=>v.by));
+    if(tab!=='vault'||!$('#vtl'))return;
+    vtList();
+    const n=vault.find(v=>v.id===vtId);
+    if(vtView==='graph')vtMain();
+    else if(!n){vtId=null;vtMain()}
+    else if(!$('#vtm').contains(document.activeElement))vtMain();
+    else vtBack(n,vtIndex());
+  },e=>fail(e));
+}
+function showVault(soft){
+  tab='vault';trk();
+  if(!soft||!$('#vtl')){
+    $('#ed').innerHTML=`<h2>Vault</h2><p class="muted">Linked notes, like Obsidian. Link notes with [[double brackets]], tag with #tags, and open the graph to see how everything connects. Your co-author sees the vault too.</p><div class="tabs" id="vtv"><button data-v="notes">Notes</button><button data-v="graph">Graph</button></div><div class="vt"><div class="vtside"><input id="vts" placeholder="Search notes…" value="${esc(vtQ)}"><div class="row"><input id="vtn" placeholder="New note title"><button class="pri" id="vta">Add</button></div><button id="vtd">📅 Today’s note</button><div id="vtg" class="tabs"></div><div id="vtl"></div></div><div id="vtm"></div></div>`;
+    $('#vtv').onclick=e=>{const b=e.target.closest('button');if(b){vtView=b.dataset.v;vtMain()}};
+    $('#vts').oninput=e=>{vtQ=e.target.value.trim();vtList()};
+    const go=()=>{const t=$('#vtn').value.trim();if(!t)return toast('Give the note a title first.');$('#vtn').value='';vtNew(t,'')};
+    $('#vta').onclick=go;$('#vtn').onkeydown=e=>{if(e.key==='Enter')go()};
+    $('#vtd').onclick=()=>{
+      const d=new Date(),t=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const ex=vault.find(v=>vtKey(v.title)===t);
+      if(ex){vtId=ex.id;vtView='notes';showVault(true)}else vtNew(t,'# '+t+'\n\n');
+    };
+    $('#vtg').onclick=e=>{const b=e.target.closest('button');if(b){vtTag=vtTag===b.dataset.t?'':b.dataset.t;vtList()}};
+    $('#vtl').onclick=e=>{const b=e.target.closest('.ch');if(b){vtId=b.dataset.id;vtView='notes';vtMain();vtList()}};
+  }
+  vtList();vtMain();
+}
+function vtList(){
+  const box=$('#vtl');if(!box)return;
+  const idx=vtIndex(),q=vtQ.toLowerCase(),tc=new Map();
+  vault.forEach(v=>vtTags(v.body).forEach(t=>tc.set(t,(tc.get(t)||0)+1)));
+  $('#vtg').innerHTML=[...tc.entries()].sort((a,b)=>b[1]-a[1]).slice(0,20).map(([t,c])=>`<button data-t="${esc(t)}" class="${t===vtTag?'on2':''}">#${esc(t)} ${c}</button>`).join('');
+  const list=vault.filter(v=>(!q||(v.title+' '+(v.body||'')).toLowerCase().includes(q))&&(!vtTag||vtTags(v.body).includes(vtTag))).sort((a,b)=>(b.at||0)-(a.at||0));
+  box.innerHTML=list.length?list.map(v=>{const bl=(idx.back.get(v.id)||[]).length;return `<button class="ch${v.id===vtId?' on':''}" data-id="${v.id}"><b>${esc(v.title)}</b><small>${bl} backlink${bl===1?'':'s'} · ${(idx.out.get(v.id)||[]).length} link${(idx.out.get(v.id)||[]).length===1?'':'s'}</small></button>`}).join(''):`<p class="muted">${vault.length?'No matches.':'No notes yet. Add one above.'}</p>`;
+}
+function vtBack(n,idx){
+  const box=$('#vtb');if(!box)return;
+  const back=idx.back.get(n.id)||[],out=idx.out.get(n.id)||[],bset=new Set(back.map(v=>v.id)),k=vtKey(n.title);
+  const un=k.length>=3?vault.filter(v=>v.id!==n.id&&!bset.has(v.id)&&String(v.body||'').toLowerCase().includes(k)):[];
+  const chip=v=>`<button class="vl" data-id="${v.id}">${esc(v.title)}</button>`;
+  box.innerHTML=`<div class="note"><b>Backlinks (${back.length})</b><div class="tabs" style="margin-top:6px">${back.length?back.map(chip).join(''):'<small class="muted">Nothing links here yet.</small>'}</div></div>`
+   +`<div class="note"><b>Links in this note (${out.length})</b><div class="tabs" style="margin-top:6px">${out.length?out.map(r=>{const t=idx.byKey.get(vtKey(r));return t?chip(t):`<button class="vl miss" data-new="${esc(r)}" title="Not created yet. Click to create it.">${esc(r)} ＋</button>`}).join(''):'<small class="muted">No [[links]] yet.</small>'}</div></div>`
+   +(un.length?`<div class="note"><b>Unlinked mentions (${un.length})</b><div class="tabs" style="margin-top:6px">${un.map(chip).join('')}</div></div>`:'');
+  box.onclick=e=>{const b=e.target.closest('.vl');if(!b)return;if(b.dataset.new)vtNew(b.dataset.new);else{vtId=b.dataset.id;vtView='notes';vtMain();vtList()}};
+}
+function vtGraph(box){
+  const idx=vtIndex();
+  let nodes=vault.slice().sort((a,b)=>(b.at||0)-(a.at||0)).slice(0,150).map(v=>({id:v.id,label:v.title,ghost:false}));
+  if(!nodes.length){box.innerHTML='<p class="muted">No notes yet. Add a few and link them with [[double brackets]] to see the graph.</p>';return}
+  const byId=new Map(nodes.map(n=>[n.id,n])),ghosts=new Map();let edges=[];
+  nodes.slice().forEach(n=>{(idx.out.get(n.id)||[]).forEach(r=>{
+    const k=vtKey(r),t=idx.byKey.get(k);
+    if(t){if(byId.has(t.id))edges.push([n.id,t.id])}
+    else if(ghosts.size<60||ghosts.has(k)){let g=ghosts.get(k);if(!g){g={id:'g:'+k,label:r,ghost:true};ghosts.set(k,g)}edges.push([n.id,g.id])}
+  })});
+  ghosts.forEach(g=>{nodes.push(g);byId.set(g.id,g)});
+  if(vtLocal&&byId.has(vtId)){
+    const keep=new Set([vtId]);edges.forEach(([a,b])=>{if(a===vtId)keep.add(b);if(b===vtId)keep.add(a)});
+    nodes=nodes.filter(n=>keep.has(n.id));edges=edges.filter(([a,b])=>keep.has(a)&&keep.has(b));
+  }
+  const W=760,H=480;vtLayout(nodes,edges,W,H);
+  const pos=new Map(nodes.map(n=>[n.id,n]));
+  const lines=edges.map(([a,b])=>`<line x1="${pos.get(a).x.toFixed(1)}" y1="${pos.get(a).y.toFixed(1)}" x2="${pos.get(b).x.toFixed(1)}" y2="${pos.get(b).y.toFixed(1)}" stroke="currentColor" stroke-opacity=".3"/>`).join('');
+  const dots=nodes.map(n=>{
+    const r=5+Math.sqrt(n.d)*2,cur=n.id===vtId,lab=n.label.length>22?n.label.slice(0,21)+'…':n.label;
+    return `<g class="gn" data-id="${esc(n.id)}" style="cursor:pointer"><circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r.toFixed(1)}" style="${n.ghost?'fill:none;stroke:currentColor;stroke-dasharray:3 3':cur?'fill:var(--acc)':'fill:currentColor;fill-opacity:.7'}"/><text x="${n.x.toFixed(1)}" y="${(n.y+r+11).toFixed(1)}" font-size="10" text-anchor="middle" style="fill:currentColor">${esc(lab)}</text></g>`;
+  }).join('');
+  box.innerHTML=`<div class="nt"><b style="flex:1">Graph</b><label class="nt"><input type="checkbox" id="vtgl" ${vtLocal?'checked':''} style="width:auto"> <small>Only the open note and its neighbors</small></label></div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px">${lines}${dots}</svg><small class="muted">Click a note to open it. Dashed circles are links to notes that don’t exist yet; click one to create it.</small>`;
+  $('#vtgl').onchange=e=>{vtLocal=e.target.checked;vtMain()};
+  box.querySelector('svg').onclick=e=>{
+    const g=e.target.closest('.gn');if(!g)return;const id=g.dataset.id;
+    if(id.startsWith('g:')){const n=pos.get(id);vtNew(n?n.label:id.slice(2))}
+    else{vtId=id;vtView='notes';vtMain();vtList()}
+  };
+}
+function vtMain(){
+  const box=$('#vtm');if(!box)return;
+  document.querySelectorAll('#vtv button').forEach(b=>b.classList.toggle('on2',b.dataset.v===vtView));
+  if(vtView==='graph')return vtGraph(box);
+  const n=vault.find(v=>v.id===vtId);
+  if(!n){box.innerHTML='<p class="muted">Pick a note on the left, or create one. Inside a note, type [[ to link to another note.</p>';return}
+  const idx=vtIndex(),id=n.id;
+  box.innerHTML=`<div class="nt"><input id="vtt" value="${esc(n.title)}" style="font-size:1.2em;font-weight:700;flex:1;min-width:0"><button id="vtr" title="Switch between editing and reading (Ctrl+E)">${vtRead?'✏️ Edit':'👁 Read'}</button><button id="vtk" class="x">Delete</button></div>`
+   +(vtRead?`<div class="vmd" id="vtp">${vtMd(n.body,idx)}</div>`:`<div style="position:relative;margin-top:8px"><textarea id="vtx" placeholder="Write here. Use [[Note name]] to link notes and #tags to organise.">${esc(n.body||'')}</textarea><div id="vtac" class="note" hidden style="position:absolute;z-index:5;margin:0;right:8px;top:8px;max-width:260px"></div></div>`)
+   +`<div id="vtb"></div><small class="muted">Created by ${esc(nm(n.by))} · last edited ${new Date(n.at||0).toLocaleString()}</small>`;
+  vtBack(n,idx);
+  let t=null,ta=$('#vtx');
+  const flush=()=>{if(t){clearTimeout(t);t=null;if(ta)vtRef(id).update({body:ta.value,at:Date.now()}).catch(fail)}};
+  const ti=$('#vtt');
+  ti.onchange=async()=>{flush();ti.value=await vtRename(id,ti.value)};
+  $('#vtr').onclick=()=>{flush();vtRead=!vtRead;vtMain()};
+  const x=$('#vtk');
+  x.onclick=()=>{if(x.dataset.a){vtRef(id).delete().then(()=>{if(vtId===id)vtId=null}).catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
+  const p=$('#vtp');
+  if(p){
+    p.onclick=e=>{
+      const a=e.target.closest('a');if(!a)return;
+      if(a.classList.contains('vwl')){e.preventDefault();const raw=a.dataset.t,tn=idx.byKey.get(vtKey(raw));if(tn){vtId=tn.id;vtMain();vtList()}else vtNew(raw)}
+      else if(a.classList.contains('vtag')){e.preventDefault();vtTag=a.dataset.t;vtList()}
+    };
+    p.onchange=e=>{
+      const c=e.target.closest('.vck');if(!c)return;
+      const ls=String(n.body||'').split('\n'),l=+c.dataset.l;
+      ls[l]=ls[l].replace(/\[( |x|X)\]/,(m,s)=>s===' '?'[x]':'[ ]');
+      vtRef(id).update({body:ls.join('\n'),at:Date.now()}).catch(fail);
+    };
+  }
+  if(ta){
+    const ac=$('#vtac'),hide=()=>{ac.hidden=true;ac.innerHTML=''};
+    const sugg=()=>{
+      const m=/\[\[([^\[\]\n|#]*)$/.exec(ta.value.slice(0,ta.selectionStart));
+      if(!m){hide();return}
+      const q=vtKey(m[1]),hits=vault.filter(v=>v.id!==id&&(!q||vtKey(v.title).includes(q))).slice(0,6).map(v=>[v.title,0]);
+      if(q&&!vault.some(v=>vtKey(v.title)===q))hits.push([m[1].trim(),1]);
+      if(!hits.length){hide();return}
+      ac.innerHTML=hits.map(([s,nw])=>`<button class="vl" data-t="${esc(s)}" style="display:block;width:100%;text-align:left">${nw?'＋ link to “'+esc(s)+'” (new)':esc(s)}</button>`).join('');ac.hidden=false;
+    };
+    const pick=s=>{
+      const pos=ta.selectionStart,before=ta.value.slice(0,pos).replace(/\[\[([^\[\]\n|#]*)$/,'[['+s+']]'),after=ta.value.slice(pos).replace(/^\]\]/,'');
+      ta.value=before+after;ta.setSelectionRange(before.length,before.length);hide();ta.dispatchEvent(new Event('input'));ta.focus();
+    };
+    ac.onmousedown=e=>e.preventDefault();
+    ac.onclick=e=>{const b=e.target.closest('button');if(b)pick(b.dataset.t)};
+    ta.oninput=()=>{clearTimeout(t);t=setTimeout(flush,700);sugg()};
+    ta.onblur=()=>{flush();setTimeout(hide,150)};
+    ta.onclick=sugg;
+    ta.onkeyup=e=>{if(!['Enter','Tab','Escape'].includes(e.key))sugg()};
+    ta.onkeydown=e=>{
+      if(!ac.hidden&&(e.key==='Enter'||e.key==='Tab')){const b=ac.querySelector('button');if(b){e.preventDefault();pick(b.dataset.t)}}
+      else if(e.key==='Escape')hide();
+      else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='e'){e.preventDefault();flush();vtRead=true;vtMain()}
+    };
+  }
+}
+
 let qnTab='shared';
 function qnSet(on,init){document.body.classList.toggle('qn-on',on);if(!init){try{localStorage.setItem('ink-qn',on?'1':'0')}catch(e){}}if(on)qnRender()}
 function qnRender(){
@@ -1128,6 +1626,7 @@ async function zipAll(){
   chapters.forEach((c,i)=>f.file(pad(i)+'-'+slug(c.title)+'.md',chFile('md',c.title||'Untitled',c.content||'')));
   if(notes.length)z.file('codex.md',notes.map(x=>'## '+x.name+' ('+x.kind+')\n\n'+(x.body||'')).join('\n\n'));
   if(evs.length)z.file('timeline.md',evs.map(e=>'- **'+(e.when||'—')+'** '+e.title+(e.body?'\n  '+e.body.replace(/\n/g,'\n  '):'')).join('\n'));
+  if(vault.length)vault.forEach(v=>z.file('vault/'+vtFile(v)+'.md',v.body||''));
   if(memos.length)z.file('notes.md',memos.map(m=>'## '+m.title+'\n\n'+(m.body||'')).join('\n\n'));
   spList().forEach(([k,,sn])=>{const l=pages.filter(p=>p.space===k);if(l.length){const d=z.folder('spaces/'+slug(sn));l.forEach((p,i)=>d.file(pad(i)+'-'+slug(p.title)+'.md','# '+p.title+'\n\n'+(p.body||'')))}});
   try{dlSave(slug(n.title||'novel')+'.zip',await z.generateAsync({type:'blob'}))}catch(e){fail(e)}
@@ -1189,9 +1688,9 @@ function route(){
   const h=location.hash.slice(1),id=/^[\w-]+$/.test(h)?h:null;
   if(id!==novelId||!built){
     novelId=id;chapId=null;chapters=[];pending=null;dirty=false;built=true;otabs=id?otLoad():[];chLoaded=false;if(!id)document.body.classList.remove('hastabs');
-    if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];
+    if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];if(unsubVt){unsubVt();unsubVt=null}vault=[];vtId=null;vtView='notes';if(unsubAc){unsubAc();unsubAc=null}acts=[];
     id?buildNovel():buildHome();
-    if(id){subC();subNotes();subStats();subEv();subMemos();subSpaces()}setPres();
+    if(id){subC();subNotes();subStats();subEv();subMemos();subSpaces();subVault();subAct()}setPres();
   }
   refresh();
 }
