@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Inkwell: Co-write Webnovels</title>
+<meta name="description" content="Inkwell: write webnovels together, with a codex, timeline, vault and maps.">
+<meta name="theme-color" content="#8a4b2a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✒️%3C/text%3E%3C/svg%3E">
 <style>
 :root{--bg:#faf7f2;--fg:#2a2622;--mut:#7a7167;--card:#fff;--line:#e6dfd4;--acc:#8a4b2a;--accfg:#fff;--warn:#fff3d6;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -91,6 +94,14 @@ body:not(.qn-on) #qnb{display:block;position:fixed;right:14px;bottom:calc(16px +
 @media (min-width:1150px){.qn-on .layout{grid-template-columns:280px minmax(0,1fr) 300px}}
 @media (max-width:1149px){.qn-on #qn{position:fixed;right:0;top:0;bottom:0;max-height:none;width:min(340px,100vw);z-index:40;background:var(--bg);box-shadow:-8px 0 24px rgba(0,0,0,.25)}}
 .mainc{min-width:0}
+:root{color-scheme:light dark}:root[data-theme="light"]{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.card{transition:border-color .15s,transform .15s}.card:hover{transform:translateY(-1px)}
+@supports(height:100dvh){.layout{min-height:calc(100dvh - 60px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media print{.top,aside,.otb,#qn,#qnb,#tg,#xf,#toast,#mapov,.tb{display:none!important}.layout{display:block!important;min-height:0}body{background:#fff;color:#000}#ed{max-width:none;padding:0}.book{max-width:none}}
+#mapov{position:fixed;inset:0;z-index:60;background:var(--bg);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}#toast{z-index:70}#mapov iframe{width:100%;height:100%;border:0;display:block}
 .otb{display:flex;align-items:flex-end;gap:2px;height:40px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 12px;background:var(--bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:6;scrollbar-width:thin}
 .otb[hidden]{display:none}
 .ot{display:flex;align-items:center;gap:6px;flex:0 0 auto;max-width:220px;height:34px;padding:0 6px 0 12px;border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;background:var(--card);color:var(--mut);cursor:pointer;font-size:14px;white-space:nowrap}
@@ -161,6 +172,357 @@ body:not(.qn-on) #qnb{display:block;position:fixed;right:14px;bottom:calc(16px +
 .dz input{margin:6px 0}
 span[style*="background-color"]{box-decoration-break:clone;-webkit-box-decoration-break:clone}
 </style>
+<script type="text/html" id="mapsrc"><!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World Map Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Literata:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#E8ECE5;--panel:#F5F7F1;--ink:#1C292B;--mute:#586868;--line:#C8D0C5;--acc:#47399B;--on:#fff;--sel:#DDE3F3;--sea:#BDD3D7;--grid:#A8C1C6;--river:#2B6A9C;--road:#6B4A2B;--warn:#8F610E;--shore:#DDEEEE;--wave:#EAF4F4}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#12181A;--panel:#192124;--ink:#E3E9E3;--mute:#92A0A0;--line:#2B3639;--acc:#A99DFF;--on:#14181A;--sel:#262C4A;--sea:#12262B;--grid:#1C3840;--river:#6FB1E0;--road:#C9A06A;--warn:#E0B25A;--shore:#2B5560;--wave:#2A4F58}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#12181A;--panel:#192124;--ink:#E3E9E3;--mute:#92A0A0;--line:#2B3639;--acc:#A99DFF;--on:#14181A;--sel:#262C4A;--sea:#12262B;--grid:#1C3840;--river:#6FB1E0;--road:#C9A06A;--warn:#E0B25A;--shore:#2B5560;--wave:#2A4F58}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "Familjen Grotesk",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:var(--ink)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.app{display:grid;grid-template-columns:330px minmax(0,1fr);height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:16px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.wname{font:600 22px/1.2 Literata,Georgia,serif;background:none;border:0;border-bottom:1px solid transparent;width:100%;padding:4px 2px}
+.wname:hover,.wname:focus{border-bottom-color:var(--line)}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input[type=checkbox]{width:auto}input[type=color]{padding:2px;height:36px;cursor:pointer}
+textarea{min-height:70px;resize:vertical;font-family:Literata,Georgia,serif}
+label{display:flex;flex-direction:column;gap:3px;color:var(--mute);font-size:13px}
+label.ck{flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-size:14px}
+h3{font:600 14px/1.3 "Familjen Grotesk",sans-serif;margin:6px 0 4px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tools button{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 2px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer}
+.tools b{font-size:18px;font-weight:400;line-height:1.2}
+.tools button:hover{background:var(--sel)}.tools button[aria-pressed=true]{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.tools button[aria-pressed=true] b{color:var(--on)}
+.row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}.row>*{flex:1;min-width:90px}
+.btn,.ghost{border-radius:6px;padding:7px 12px;cursor:pointer;border:1px solid var(--line);background:none;text-decoration:none;text-align:center;display:inline-block}
+.btn{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:500}.ghost:hover{background:var(--sel)}
+.danger:hover{border-color:var(--warn);color:var(--warn)}
+.hint{color:var(--mute);font-size:14px;margin:2px 0}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.item{width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.item[aria-current=true]{border-color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
+.item .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item .m{color:var(--mute);font-size:13px}
+.sw{width:14px;height:14px;border-radius:4px;flex:none}
+.card{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.mapwrap{position:relative;min-width:0;min-height:0;overflow:hidden}
+#map{display:block;width:100%;height:100%;touch-action:none;background:var(--sea);cursor:grab;user-select:none;-webkit-user-select:none}
+.mapwrap.draw #map{cursor:crosshair}
+.zoom{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.zoom button{background:none;border:0;border-bottom:1px solid var(--line);width:40px;height:38px;cursor:pointer;font-size:17px}
+.zoom button:last-child{border:0}.zoom button:hover{background:var(--sel)}
+.scale{position:absolute;top:12px;left:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--mute);pointer-events:none}
+.scale:empty{display:none}
+.scale i{display:block;height:5px;border:2px solid var(--ink);border-top:0;margin-bottom:2px}
+.hintbar{position:absolute;left:12px;right:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.hintbar span{flex:1;min-width:200px}.hintbar button{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}.hintbar button:hover{background:var(--sel)}
+.ics{display:flex;flex-wrap:wrap;gap:2px}.ics button{background:none;border:0;font-size:20px;line-height:1;cursor:pointer;padding:5px;border-radius:6px}.ics button:hover,.ics button[aria-pressed=true]{background:var(--sel)}
+.rose{position:absolute;top:56px;left:12px;width:56px;height:56px;pointer-events:none}
+.vx{fill:var(--panel);stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke;cursor:move}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;width:min(560px,92vw);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.45)}dialog h2{font:600 22px Literata,Georgia,serif;margin:0 0 6px}
+dialog textarea{min-height:240px;font:12px/1.4 ui-monospace,Menlo,monospace}dialog img{width:100%;border:1px solid var(--line);border-radius:6px}
+@media(max-width:860px){.app{grid-template-columns:1fr;grid-template-rows:62dvh auto;height:auto}.mapwrap{order:-1}.side{border-right:0;border-top:1px solid var(--line)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body>
+<div class="app">
+<aside class="side">
+ <button class="ghost" data-a="back">← Back to novel</button><input class="wname" id="wname" aria-label="Map name">
+ <div class="row"><label>Saved maps<select id="o-maps"></select></label><button class="ghost" data-a="newmap">New</button><button class="ghost" data-a="dupmap">Copy</button><button class="ghost danger" id="delBtn" data-a="delmap">Delete map</button></div>
+ <div id="tools"></div><div id="ins"></div><div id="lists"></div>
+ <h3>View</h3>
+ <div class="row"><label class="ck"><input type="checkbox" id="o-grid">Grid</label><label class="ck"><input type="checkbox" id="o-waves" checked>Waves</label><label class="ck"><input type="checkbox" id="o-hand" checked>Squiggly lines</label><label class="ck"><input type="checkbox" id="o-wx" checked>Weather</label><label class="ck"><input type="checkbox" id="o-rose" checked>Compass</label><label class="ck"><input type="checkbox" id="o-snap">Snap</label><label class="ck"><input type="checkbox" id="o-names" checked>Names</label><label class="ck"><input type="checkbox" id="o-ll" checked>Line labels</label><label class="ck"><input type="checkbox" id="o-legend">Legend in export</label><label class="ck"><input type="checkbox" id="o-terr" checked>Terrain</label><label class="ck"><input type="checkbox" id="o-lines" checked>Roads and rivers</label></div>
+ <label>Lighting and style<select id="o-time"><option value="">Day</option><option value="dawn">Dawn</option><option value="dusk">Dusk</option><option value="night">Night</option><option value="parchment">Parchment</option></select></label>
+ <div class="row"><label>Km per grid square<input id="s-km" type="number" min="1"></label><label>Km per day<input id="s-day" type="number" min="1"></label><label>Travel pace<select id="o-pre"><option value="">Custom</option><option value="25">Cart (25)</option><option value="30">On foot (30)</option><option value="60">Horse (60)</option><option value="100">Ship (100)</option><option value="200">Flying (200)</option></select></label></div>
+ <div class="row"><button class="ghost" data-a="export">Export image</button><button class="ghost" data-a="backup">Backup</button><button class="ghost" data-a="keys">Keys</button><button class="ghost danger" data-a="reset" title="Clears this map. Ctrl+Z brings it back.">Clear map</button></div>
+</aside>
+<section class="mapwrap" id="wrap">
+ <svg id="map" role="img" aria-label="World map"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--grid)"/></pattern><pattern id="waves" width="90" height="46" patternUnits="userSpaceOnUse"><path d="M0 14q11-9 22 0t22 0t22 0t24 0M45 38q11-9 22 0t22 0M-1 38q6-5 12 0" fill="none" stroke="var(--wave)" stroke-width="2" stroke-opacity=".7" stroke-linecap="round"/></pattern></defs><rect id="seaw" x="-20000" y="-20000" width="40000" height="40000" fill="url(#waves)"/><rect id="gridr" x="-20000" y="-20000" width="40000" height="40000" fill="url(#grid)"/><g id="layer"></g><rect id="tint" x="-20000" y="-20000" width="40000" height="40000" fill="transparent" style="pointer-events:none"/></svg>
+ <div class="zoom"><button data-a="zin" aria-label="Zoom in">+</button><button data-a="zout" aria-label="Zoom out">−</button><button data-a="fit" aria-label="Fit map">⤢</button><button data-a="undo" aria-label="Undo">↶</button><button data-a="redo" aria-label="Redo">↷</button></div>
+ <div class="scale" id="scale"></div><div class="scale" id="coord" style="top:120px"></div><svg class="rose" id="rose" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="28" fill="var(--panel)" stroke="var(--line)"/><path d="M30 14L35 30H25Z" fill="var(--ink)"/><path d="M30 46L35 30H25Z" fill="none" stroke="var(--mute)"/><text x="30" y="12" text-anchor="middle" font-size="10" fill="var(--ink)" style="font-family:Literata,Georgia,serif;font-weight:600">N</text></svg><div class="hintbar" id="hint"></div>
+</section></div>
+<dialog id="kb"><h2>Keyboard shortcuts</h2><p class="hint">V Select · B Border · P Place · L Line · W Weather · M Measure<br>+ and - zoom · 0 fit · F zoom to selection · G grid<br>D duplicate place · Ctrl+C / Ctrl+V copy and paste<br>Arrow keys nudge (Shift for more) · Delete remove<br>Enter finish shape · Backspace undo point · Esc cancel<br>Ctrl+Z / Ctrl+Y undo and redo · / search · ? this list</p><div class="row"><button class="ghost" data-a="close">Close</button></div></dialog>
+<dialog id="ex"><h2>Export image</h2><p class="hint">Right-click or long-press the image to save it.</p><img id="exImg" alt="Exported map"><div class="row" style="margin-top:10px"><a class="btn" id="exDl" download="map.png">Download PNG</a><a class="ghost" id="exSvg" download="map.svg">Download SVG</a><button class="ghost" data-a="close">Close</button></div></dialog>
+<dialog id="bk"><h2>Backup and restore</h2><p class="hint">Your map is saved in this browser. Copy this text to keep a backup, or paste a saved copy and load it.</p><label>Open a saved file<input type="file" id="bkFile" accept=".json,application/json"></label><textarea id="bkText" aria-label="Map data"></textarea><p class="hint" id="bkMsg" role="status"></p><div class="row"><button class="btn" data-a="load">Load this text</button><button class="ghost" data-a="loadnew">Load as new map</button><a class="ghost" id="bkDl" download="map.json">Download file</a><button class="ghost" data-a="close">Close</button></div></dialog>
+<script>
+const BR=window.parent.__inkmap;let CUR=BR.cur();const $=s=>document.querySelector(s),svg=$("#map");
+const COLORS=["#B5654A","#4F8A6B","#6B6BB5","#C2A13F","#9A5C8F","#3F8C9A","#A8584E","#7C9A3F"];
+const TERR={forest:["Forest","#4F8A4B","Forests"],pine:["Pine forest","#3F7A58","Forests"],darkwood:["Dark forest","#2F5A42","Forests"],autumn:["Autumn forest","#C98A45","Forests"],jungle:["Jungle","#3F9A52","Forests"],mountains:["Mountains","#8A8A86","Highlands"],rocky:["Rocky ground","#A69B8E","Highlands"],hills:["Hills","#B3A869","Highlands"],meadow:["Mountain meadow","#A9C77A","Highlands"],volcanic:["Volcanic land","#6B5755","Highlands"],tundra:["Tundra","#C9D8DF","Cold"],snow:["Snowfield","#E6EEF3","Cold"],glacier:["Glacier","#BFE0EE","Cold"],desert:["Desert","#D2B26A","Dry and plains"],badlands:["Badlands","#C27B55","Dry and plains"],savanna:["Savanna","#D4C77A","Dry and plains"],plains:["Grassland","#BBD48B","Dry and plains"],lake:["Lake","#4C8FC4","Water and coast"],swamp:["Swamp","#6B7F4A","Water and coast"],beach:["Beach","#EBDDB0","Water and coast"],reef:["Coral reef","#6EC5C0","Water and coast"]};
+const GROUPS=["Lines","Forests","Highlands","Cold","Dry and plains","Water and coast"];
+const lineOpts=s=>GROUPS.map(g=>`<optgroup label="${g}">${Object.entries(LINES).filter(([k,v])=>(v[2]||"Lines")===g).map(([k,v])=>`<option value="${k}" ${k===s?"selected":""}>${v[0]}</option>`).join("")}</optgroup>`).join("");
+const PAT={
+forest:[22,22,"<circle cx='6' cy='7' r='4' fill='#2F6B34' opacity='.75'/><circle cx='16' cy='16' r='4' fill='#2F6B34' opacity='.75'/>"],
+pine:[24,22,"<path d='M5 15l4-10 4 10zM15 21l4-9 4 9z' fill='#1F4D36' opacity='.8'/>"],
+darkwood:[20,20,"<circle cx='5' cy='6' r='3.5' fill='#14301F' opacity='.85'/><circle cx='15' cy='15' r='3.5' fill='#14301F' opacity='.85'/>"],
+autumn:[22,22,"<circle cx='6' cy='7' r='4' fill='#C8582A' opacity='.8'/><circle cx='16' cy='16' r='4' fill='#E0A030' opacity='.85'/>"],
+jungle:[22,22,"<circle cx='5' cy='5' r='5' fill='#1F6B35' opacity='.8'/><circle cx='15' cy='12' r='6' fill='#2E8B45' opacity='.8'/><path d='M3 19q3-4 6 0' stroke='#145A2A' fill='none' stroke-width='1.5'/>"],
+mountains:[28,22,"<path d='M3 18l8-13 8 13M16 18l6-9 6 9' fill='none' stroke='#4A4A47' stroke-width='2' stroke-linejoin='round'/>"],
+rocky:[26,24,"<path d='M3 8l4-4 5 2 1 5-5 3zM16 19l3-3 4 1 1 4-4 2z' fill='#6E665D' opacity='.7'/>"],
+hills:[22,18,"<path d='M2 14q5-9 10 0M10 14q5-9 10 0' fill='none' stroke='#6E6A38' stroke-width='2'/>"],
+meadow:[22,22,"<path d='M4 14l1-5M6 14v-6M8 14l-1-5' stroke='#4F8A3A' stroke-width='1.4' fill='none'/><circle cx='16' cy='6' r='1.6' fill='#F4E04D'/><circle cx='12' cy='19' r='1.6' fill='#fff'/>"],
+volcanic:[22,20,"<path d='M3 16l5-9 5 9z' fill='#3A2E2C' opacity='.8'/><circle cx='17' cy='6' r='1.5' fill='#E2552A'/>"],
+tundra:[16,16,"<circle cx='4' cy='4' r='1.2' fill='#fff'/><circle cx='12' cy='12' r='1.2' fill='#fff'/>"],
+snow:[18,18,"<circle cx='4' cy='4' r='1.5' fill='#fff'/><path d='M12 3v4M10 5h4' stroke='#fff' stroke-width='1'/><path d='M2 15l4-3 4 3' stroke='#9DB6C4' fill='none' stroke-width='1.2'/>"],
+glacier:[24,22,"<path d='M2 6l8 5-3 7M14 2l-2 8 7 4' stroke='#fff' stroke-width='1.6' fill='none' opacity='.9'/>"],
+desert:[14,14,"<circle cx='3' cy='3' r='1.3' fill='#9B7B35'/><circle cx='10' cy='10' r='1.3' fill='#9B7B35'/>"],
+badlands:[22,22,"<path d='M0 5h22M0 11h22M0 17h22' stroke='#8A4B2E' stroke-width='2' opacity='.5'/>"],
+savanna:[20,20,"<circle cx='5' cy='5' r='1.2' fill='#7A6A20'/><path d='M13 16l1-4M16 16v-5' stroke='#8C7A2C' stroke-width='1.3'/>"],
+plains:[20,16,"<path d='M3 10l1-4M6 10V5M9 10l-1-4' stroke='#6C8F3A' stroke-width='1.3' fill='none'/>"],
+lake:[24,12,"<path d='M2 6q5-5 10 0t10 0' fill='none' stroke='#fff' stroke-opacity='.6' stroke-width='1.5'/>"],
+swamp:[20,16,"<path d='M3 5h8M10 12h8' stroke='#3E5230' stroke-width='2' stroke-linecap='round'/>"],
+beach:[12,12,"<circle cx='3' cy='3' r='1' fill='#B8A06A'/><circle cx='9' cy='8' r='1' fill='#B8A06A'/>"],
+reef:[18,18,"<path d='M3 14q2-6 4 0M9 12q2-8 4 0' stroke='#E8765B' stroke-width='2' fill='none'/>"]};
+svg.querySelector("defs").insertAdjacentHTML("beforeend",Object.entries(PAT).map(([k,[w,h,c]])=>`<pattern id="p-${k}" width="${w}" height="${h}" patternUnits="userSpaceOnUse">${c}</pattern>`).join(""));
+const LINES={river:["River"],road:["Road"],route:["Sea route"],wall:["Wall"],...TERR};
+const LS={river:["var(--river)",3.5,""],road:["var(--road)",2.5,"7 4"],route:["var(--river)",2.5,"2 7"],wall:["var(--ink)",5,"16 3"]};
+const PT={village:"Village",town:"Town",city:"City",fort:"Fort",port:"Port",landmark:"Landmark",mountain:"Mountain",forest:"Forest",animal:"Animal",feature:"Feature",label:"Map label",weather:"Weather",volcano:"Volcano",cave:"Cave",waterfall:"Waterfall",oasis:"Oasis",island:"Island",ruins:"Ruins",tower:"Tower",temple:"Temple",tavern:"Tavern",mine:"Mine",camp:"Camp",bridge:"Bridge"};
+const PTI={volcano:"🌋",cave:"🕳️",waterfall:"💧",oasis:"🌴",island:"🏝️",ruins:"🏚️",tower:"🗼",temple:"⛩️",tavern:"🍺",mine:"⛏️",camp:"⛺",bridge:"🌉"};
+const WX=[["☀️","Clear skies"],["🌤️","Fair weather"],["⛅","Partly cloudy"],["☁️","Overcast"],["🌧️","Rain"],["⛈️","Thunderstorm"],["❄️","Snow"],["🌫️","Fog"],["🌪️","Tornado"],["🌀","Cyclone"],["💨","High winds"],["🌈","Rainbow"]];
+const ICONS=["🏰","⚓","🚢","⛪","🏯","🌲","⛰️","🌋","🏝️","🐉","🐋","🦈","⚔️","💀","⭐","🔥"];
+const TOOLS=[["select","⌖","Select","V"],["border","⬠","Border","B"],["place","📍","Place","P"],["line","〰","Line","L"],["weather","⛅","Weather","W"],["measure","📏","Measure","M"]];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fix=d=>{d.name=d.name||"Untitled map";d.nations=(Array.isArray(d.nations)?d.nations:[]).filter(Boolean);d.places=(Array.isArray(d.places)?d.places:[]).filter(p=>p&&isFinite(p.x)&&isFinite(p.y));d.paths=(Array.isArray(d.paths)?d.paths:[]).filter(q=>q&&Array.isArray(q.pts)&&q.pts.length>1);d.nations.forEach(n=>n.polys=(Array.isArray(n.polys)?n.polys:[]).filter(q=>Array.isArray(q)&&q.length>2));d.kmGrid=d.kmGrid||100;d.kmDay=d.kmDay||30;return d};
+const load=()=>{try{const m=BR.get(CUR);return fix(m&&m.body?JSON.parse(m.body):{})}catch(e){return fix({})}};
+let S=load(),hist=[JSON.stringify(S)],fut=[],sel=null,tool="select",draft=[],cur=null,drag=null,pinch=0;
+let clip=null;const V={cx:800,cy:500,w:1600},O={wx:"☀️",ptype:"town",lkind:"river",q:""},ptrs=new Map();
+const persist=()=>{BR.save(CUR,S.name,JSON.stringify(S))};
+function commit(){persist();const j=JSON.stringify(S);if(hist[hist.length-1]!==j){hist.push(j);fut=[];if(hist.length>80)hist.shift()}}
+function restore(j){S=fix(JSON.parse(j));persist();sel=null;draft=[];tool="select";$("#wname").value=S.name;all()}
+const undo=()=>{if(hist.length>1){fut.push(hist.pop());restore(hist[hist.length-1])}};
+const redo=()=>{if(fut.length){const j=fut.pop();hist.push(j);restore(j)}};
+const get=(k,id)=>(k==="n"?S.nations:k==="p"?S.places:S.paths).find(o=>o.id===id);
+const selObj=()=>sel&&get(sel.k,sel.id),rings=o=>o.polys||[o.pts],isSel=(k,id)=>sel&&sel.k===k&&sel.id===id;
+const inPoly=(x,y,p)=>{let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const[a,b]=p[i],[d,e]=p[j];if((b>y)!==(e>y)&&x<(d-a)*(y-b)/(e-b)+a)c=!c}return c};
+const natOf=p=>S.nations.find(n=>n.polys.some(q=>inPoly(p.x,p.y,q)));
+function cen(p){let A=0,x=0,y=0;for(let i=0;i<p.length;i++){const[a,b]=p[i],[c,d]=p[(i+1)%p.length],f=a*d-c*b;A+=f;x+=(a+c)*f;y+=(b+d)*f}
+ return A?[x/(3*A),y/(3*A),Math.abs(A/2)]:[p.reduce((s,q)=>s+q[0],0)/p.length,p.reduce((s,q)=>s+q[1],0)/p.length,0]}
+const big=n=>n.polys.map(cen).reduce((a,b)=>b[2]>a[2]?b:a);
+const plen=a=>{let u=0;for(let i=1;i<a.length;i++)u+=Math.hypot(a[i][0]-a[i-1][0],a[i][1]-a[i-1][1]);return u};
+const km=u=>u/100*S.kmGrid;
+const pt=ev=>{const r=svg.getBoundingClientRect(),k=V.w/r.width;return[V.cx-V.w/2+(ev.clientX-r.left)*k,V.cy-V.w*r.height/r.width/2+(ev.clientY-r.top)*k]};
+const P=ev=>pt(ev).map(v=>$("#o-snap").checked?Math.round(v/25)*25:Math.round(v));
+function sym(p,k){const s=7*k,x=p.x,y=p.y,c=p.pcolor||"var(--ink)";let o="";
+ const f=`fill="${c}" stroke="var(--sea)" stroke-width="1.5" vector-effect="non-scaling-stroke"`,r=`fill="var(--sea)" stroke="${c}" stroke-width="2.5" vector-effect="non-scaling-stroke"`;
+ if(p.type==="weather")return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${s*3.4*(p.size||1)}" style="pointer-events:none">${esc(p.icon||"☁️")}</text>`;
+ if(p.icon)o=`<circle cx="${x}" cy="${y}" r="${s*1.5}" style="fill:var(--panel)" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${s*1.8}">${esc(p.icon)}</text>`;
+ else if(p.type==="village")o=`<circle ${f} cx="${x}" cy="${y}" r="${s*.6}"/>`;
+ else if(p.type==="town")o=`<circle ${r} cx="${x}" cy="${y}" r="${s}"/>`;
+ else if(p.type==="city")o=`<rect ${f} x="${x-s}" y="${y-s}" width="${2*s}" height="${2*s}"/>`;
+ else if(p.type==="port")o=`<circle ${r} cx="${x}" cy="${y}" r="${s}"/><circle ${f} cx="${x}" cy="${y}" r="${s*.35}"/>`;
+ else if(p.type==="fort"||p.type==="mountain")o=`<path ${f} d="M${x} ${y-s*1.2}L${x+s*1.1} ${y+s*.8}L${x-s*1.1} ${y+s*.8}Z"/>`;
+ else if(p.type!=="label")o=`<path ${f} d="M${x} ${y-s*1.3}L${x+s} ${y}L${x} ${y+s*1.3}L${x-s} ${y}Z"/>`;
+ if(p.capital)o+=`<circle cx="${x}" cy="${y}" r="${s*(p.icon?2:1.8)}" fill="none" stroke="#E0B25A" stroke-width="3" vector-effect="non-scaling-stroke"/>`;
+ return o}
+const hr=(x,y,i)=>{const s=Math.sin(x*12.9898+y*78.233+i*37.719)*43758.5453;return s-Math.floor(s)};
+const chaikin=(p,c)=>{const o=[],n=p.length;for(let i=0;i<(c?n:n-1);i++){const a=p[i],b=p[(i+1)%n];o.push([.75*a[0]+.25*b[0],.75*a[1]+.25*b[1]],[.25*a[0]+.75*b[0],.25*a[1]+.75*b[1]])}return c?o:[p[0],...o,p[n-1]]};
+function sq(pts,closed){const n=pts.length;if(n<2)return pts;const w=[];
+ for(let i=0;i<(closed?n:n-1);i++){const a=pts[i],b=pts[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,c=Math.max(1,Math.round(L/35));w.push(a);
+  for(let j=1;j<c;j++){const t=j/c,o=(hr(a[0],a[1],j)-.5)*Math.min(18,L*.25);w.push([a[0]+dx*t-dy/L*o,a[1]+dy*t+dx/L*o])}}
+ if(!closed)w.push(pts[n-1]);return chaikin(chaikin(w,closed),closed)}
+let raf=0;function draw(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;drawNow()})}
+function drawNow(){
+ const r=svg.getBoundingClientRect();if(!r.width)return;
+ const k=V.w/r.width,h=r.height*k;svg.setAttribute("viewBox",`${V.cx-V.w/2} ${V.cy-h/2} ${V.w} ${h}`);
+ const T=(x,y,t,s,i=1)=>`<text x="${x}" y="${y}" font-size="${s*k}" style="font-family:Literata,Georgia,serif;font-weight:600;font-style:${i?"italic":"normal"};fill:var(--ink);stroke:var(--sea);stroke-width:${s*k*.22};paint-order:stroke;text-anchor:middle;pointer-events:none">${esc(t)}</text>`;
+ const vs=(kk,o)=>rings(o).map((q,ri)=>q.map((a,vi)=>`<circle class="vx" data-v="${kk}:${o.id}:${ri}:${vi}" cx="${a[0]}" cy="${a[1]}" r="${6*k}"/>`).join("")).join("");
+ const hd=$("#o-hand").checked;let a="",b="",c="",d="",e="",f="";
+ for(const q of S.paths){if(TERR[q.kind]?!$("#o-terr").checked:!$("#o-lines").checked)continue;const on=isSel("l",q.id),pp=(hd?sq(q.pts,!!TERR[q.kind]):q.pts).join(" ");
+  if(TERR[q.kind]){const col=TERR[q.kind][1];a+=`<polygon data-k="l" data-id="${q.id}" points="${pp}" fill="${col}" fill-opacity="${q.kind==="lake"?.8:.55}" stroke="${col}" stroke-width="${on?3.5:1.5}" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><polygon points="${pp}" fill="url(#p-${q.kind})" style="pointer-events:none"/>`+(q.pts.length&&$("#o-ll").checked?T(cen(q.pts)[0],cen(q.pts)[1],q.name,14):"")}
+  else{const m=q.pts[Math.floor(q.pts.length/2)];c+=`<polyline data-k="l" data-id="${q.id}" points="${pp}" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" vector-effect="non-scaling-stroke"/><polyline points="${pp}" fill="none" stroke="${q.lcolor||(LS[q.kind]?LS[q.kind][0]:"var(--ink)")}" stroke-width="${on?Math.max(5,(q.lw||0)+2):q.lw||(LS[q.kind]?LS[q.kind][1]:2.5)}" ${LS[q.kind]&&LS[q.kind][2]?`stroke-dasharray="${LS[q.kind][2]}" `:""}stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="pointer-events:none"/>`+($("#o-ll").checked?T(m[0],m[1]-6*k,q.name,12):"")}
+  if(on)f+=vs("l",q)}
+ for(const n of S.nations){const on=isSel("n",n.id);
+  n.polys.forEach(p0=>{const p=hd?sq(p0,1):p0;a+=`<polygon points="${p.join(" ")}" fill="none" stroke="var(--shore)" stroke-opacity=".7" stroke-width="26" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="pointer-events:none"/>`;b+=`<polygon points="${p.join(" ")}" fill="none" stroke="${n.color}" stroke-opacity=".22" stroke-width="9" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="pointer-events:none"/><polygon data-k="n" data-id="${n.id}" points="${p.join(" ")}" fill="${n.color}" fill-opacity="${on?.6:.4}" stroke="${n.color}" stroke-width="${on?3.5:2}"${n.dash?' stroke-dasharray="8 5"':""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`});
+  if(n.polys.length){const m=big(n);e+=T(m[0],m[1],n.name,19*(n.ls||1))}
+  if(on)f+=vs("n",n)}
+ if(draft.length){const pts=draft.concat(cur?[cur]:[]);d+=`<polyline points="${pts.join(" ")}" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>`+draft.map((q,i)=>`<circle cx="${q[0]}" cy="${q[1]}" r="${(i?4:7)*k}" fill="var(--ink)" stroke="var(--panel)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`).join("")}
+ let g="";
+ for(const p of S.places){if(p.type==="weather"&&!$("#o-wx").checked&&!isSel("p",p.id))continue;const s=7*k,on=isSel("p",p.id),major=p.capital||p.type==="city",show=p.type!=="label"&&(p.type!=="weather"||on)&&$("#o-names").checked&&(major||on||V.w<(p.type==="town"||p.type==="port"?4000:2200));
+  g+=`<g data-k="p" data-id="${p.id}" style="cursor:pointer"><title>${esc(p.name)}${p.notes?" — "+esc(p.notes.slice(0,120)):""}</title>${on?`<circle cx="${p.x}" cy="${p.y}" r="${s*2.6}" fill="none" stroke="var(--acc)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:""}<circle cx="${p.x}" cy="${p.y}" r="${s*2}" fill="transparent"/>${sym(p,k)}${p.type==="label"?T(p.x,p.y,p.name,20*(p.size||1)):show?`<text x="${p.x+s*2}" y="${p.y+s*.5}" font-size="${(major?15:13)*k*(p.size||1)}" style="font-family:Literata,Georgia,serif;font-weight:${major?600:400};fill:var(--ink);stroke:var(--sea);stroke-width:${3*k};paint-order:stroke;pointer-events:none">${esc(p.name)}</text>`:""}</g>`}
+ $("#gridr").style.display=$("#o-grid").checked?"":"none";$("#seaw").style.display=$("#o-waves").checked?"":"none";$("#rose").style.display=$("#o-rose").checked?"":"none";const TN={dawn:["#FF9A5A",.2],dusk:["#6A3A8A",.3],night:["#06143F",.5],parchment:["#B98B4A",.28]}[$("#o-time").value];$("#tint").setAttribute("fill",TN?TN[0]:"transparent");$("#tint").setAttribute("fill-opacity",TN?TN[1]:0);
+ $("#layer").innerHTML=a+b+c+d+f+e+g;
+ const kpp=S.kmGrid*k/100,raw=110*kpp,bs=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/bs,nice=(m>=5?5:m>=2?2:1)*bs;
+ try{localStorage.setItem("worldmap.view",JSON.stringify(V))}catch(e){}
+ $("#scale").innerHTML=`<i style="width:${nice/kpp}px"></i>${+nice.toPrecision(3)} km`}
+function tools(){
+ $("#tools").innerHTML=`<div class="tools" role="toolbar" aria-label="Tools">${TOOLS.map(([t,i,l,key])=>`<button data-t="${t}" aria-pressed="${tool===t}" title="${l} (${key})"><b>${i}</b>${l}</button>`).join("")}</div>`+
+ (tool==="place"?`<label>Place type<select id="o-pt">${Object.entries(PT).map(([k,l])=>`<option value="${k}" ${k===O.ptype?"selected":""}>${l}</option>`).join("")}</select></label>`:"")+
+ (tool==="weather"?`<div class="ics" role="group" aria-label="Weather icon">${WX.map(([e,l])=>`<button data-w="${e}" title="${l}" aria-label="${l}" aria-pressed="${O.wx===e}">${e}</button>`).join("")}</div>`:"")+(tool==="line"?`<label>Line or terrain<select id="o-lk">${lineOpts(O.lkind)}</select></label>`:"");
+ $("#wrap").className="mapwrap"+(tool==="select"?"":" draw")}
+function lists(){
+ const q=O.q.toLowerCase(),ok=x=>!q||x.name.toLowerCase().includes(q)||(x.notes||"").toLowerCase().includes(q);
+ const it=(k,o,sw,m)=>`<li><button class="item" data-s="${k}:${o.id}" ${isSel(k,o.id)?'aria-current="true"':""}>${sw||""}<span class="t">${esc(o.name)||"Unnamed"}</span><span class="m">${m}</span></button></li>`;
+ const ns=S.nations.filter(ok).map(n=>it("n",n,`<span class="sw" style="background:${n.color}"></span>`,S.places.filter(p=>natOf(p)===n).length)).join("");
+ const ps=S.places.filter(ok).sort((a,b)=>a.name.localeCompare(b.name)).map(p=>it("p",p,p.icon?esc(p.icon):"",(p.capital?"★ ":"")+(PT[p.type]||p.type))).join("");
+ const ls=S.paths.filter(ok).map(o=>it("l",o,"",LINES[o.kind]?LINES[o.kind][0]:o.kind)).join("");
+ const sec=(t,h,e)=>`<h3>${t}</h3>${h?`<ul class="list">${h}</ul>`:`<p class="hint">${e}</p>`}`;
+ $("#lists").innerHTML=`<p class="hint">${S.nations.length} nations, ${S.places.length} places, population ${S.nations.reduce((s,n)=>s+(n.pop||0),0).toLocaleString()}.</p><input id="find" type="search" placeholder="Find anything (press /)" aria-label="Find a nation, place or line" value="${esc(O.q)}">`+sec("Nations",ns,"None yet. Pick Border and click the map.")+sec("Places",ps,"None yet. Pick Place and click the map.")+(S.paths.length?sec("Lines and terrain",ls,"No matches."):"")
+ const f=$("#find");if(document.activeElement.id==="find"||O.focus){f.focus();f.setSelectionRange(99,99)}}
+function ins(){
+ const o=selObj(),el=$("#ins");if(!o){el.innerHTML="";return}
+ const L=(t,h)=>`<label>${t}${h}</label>`,nm=L("Name",`<input id="f-name" value="${esc(o.name)}">`),nt=L("Notes",`<textarea id="f-notes" placeholder="History, who lives here, what it is known for.">${esc(o.notes||"")}</textarea>`);
+ let h;
+ if(sel.k==="n"){const ar=Math.round(o.polys.reduce((s,q)=>s+cen(q)[2],0)/1e4*S.kmGrid**2);h=`<h3>Nation</h3>${nm}<div class="row">${L("Color",`<input id="f-color" type="color" value="${o.color}">`)}${L("Population",`<input id="f-pop" type="number" min="0" value="${o.pop||0}">`)}</div>${L("Label size",`<input id="f-ls" type="range" min=".5" max="3" step=".1" value="${o.ls||1}">`)}<label class="ck"><input id="f-dash" type="checkbox" ${o.dash?"checked":""}>Dashed border</label>${nt}<p class="hint">${o.polys.length} territor${o.polys.length===1?"y":"ies"}, about ${ar.toLocaleString()} km², ${S.places.filter(p=>natOf(p)===o).length} places${o.pop&&ar?`, ${(o.pop/ar).toFixed(1)} people per km²`:""}.</p><div class="row"><button class="ghost" data-a="terr">Add territory</button><button class="ghost danger" data-a="del">Delete</button></div>`}
+ else if(sel.k==="p"){const n=natOf(o);h=`<h3>Place</h3>${nm}<div class="row">${L("Type",`<select id="f-type">${Object.entries(PT).map(([k,l])=>`<option value="${k}" ${k===o.type?"selected":""}>${l}</option>`).join("")}</select>`)}${L("Icon (emoji)",`<input id="f-icon" maxlength="4" value="${esc(o.icon||"")}" placeholder="Optional">`)}${L("Color",`<input id="f-pc" type="color" value="${o.pcolor||"#B5654A"}">`)}</div>${L(o.type==="weather"||o.type==="label"?"Size":"Label size",`<input id="f-size" type="range" min=".5" max="4" step=".1" value="${o.size||1}">`)}<label class="ck"><input id="f-cap" type="checkbox" ${o.capital?"checked":""}>Capital</label><div class="ics" role="group" aria-label="Quick icons">${ICONS.map(e=>`<button data-ic="${e}" aria-label="Use icon ${e}">${e}</button>`).join("")}</div>${nt}<p class="hint">${n?"Inside "+esc(n.name)+".":"Outside every nation’s borders."} Arrow keys nudge it.</p><div class="row"><button class="ghost" data-a="dup">Duplicate</button><button class="ghost danger" data-a="del">Delete</button></div>`}
+ else{const L2=TERR[o.kind]?"":`<p class="hint">About ${Math.round(km(plen(o.pts))).toLocaleString()} km, roughly ${(km(plen(o.pts))/S.kmDay).toFixed(1)} days of travel.</p>`;h=`<h3>${(LINES[o.kind]||[o.kind])[0]}</h3>${nm}${L("Kind",`<select id="f-kind">${lineOpts(o.kind)}</select>`)}${L2}${TERR[o.kind]?"":`<div class="row">${L("Color",`<input id="f-lc" type="color" value="${o.lcolor||"#2B6A9C"}">`)}${L("Width",`<input id="f-lw" type="range" min="1" max="10" step=".5" value="${o.lw||(LS[o.kind]?LS[o.kind][1]:2.5)}">`)}</div>`}${nt}<div class="row"><button class="ghost danger" data-a="del">Delete</button></div>`}
+ el.innerHTML=`<div class="card">${h}</div>`}
+function hint(){
+ const d=draft.length,n=selObj(),nn=sel&&sel.k==="n"&&n?esc(n.name):"a new nation";let h,b="";
+ const u=d?`<button data-a="pop">Undo point</button>`:"",x=`<button data-a="cancel">Cancel</button>`;
+ if(tool==="select")h="Drag to pan, scroll or pinch to zoom. Drag points to reshape. Double-click a line to add a point, a point to remove it. Keys: + and - zoom, 0 fits, D duplicates a place, G toggles the grid, F zooms to the selection, arrow keys nudge it, Ctrl+C and Ctrl+V copy and paste it. Drag a selected nation to move it with its places.";
+ else if(tool==="weather")h="Pick a weather icon above, then click the map to place it. Select one to move or resize it.";
+ else if(tool==="place")h=`Click the map to add a ${(PT[O.ptype]||"place").toLowerCase()}.`;
+ else if(tool==="measure"){const a=d?draft.concat(cur?[cur]:[]):[],kk=km(plen(a));h=a.length>1?`${Math.round(kk)} km, about ${(kk/S.kmDay).toFixed(kk/S.kmDay<10?1:0)} days of travel.`:"Click points (or places) along a route to measure it.";b=u+(d>1?`<button data-a="saveroad">Save as road</button>`:"")+`<button data-a="cancel">Done</button>`}
+ else if(tool==="line"){const t=TERR[O.lkind],min=t?3:2;h=d?`${d} point${d>1?"s":""}. Press Enter or Finish to end.`:`Click to ${t?"outline":"trace"} a ${LINES[O.lkind][0].toLowerCase()}.`;b=u+(d>=min?`<button data-a="finish">Finish</button>`:"")+x}
+ else{h=d?`${d} point${d>1?"s":""}. Click the first point or press Enter to close.`:`Click to place border points for ${nn}.`;b=u+(d>=3?`<button data-a="finish">Close border</button>`:"")+x}
+ $("#hint").innerHTML=`<span>${h}</span>${b}`}
+function all(){tools();lists();ins();hint();draw()}
+function setTool(t){tool=t;draft=[];cur=null;all()}
+function pick(s){sel=s;lists();ins();draw();if(tool==="border")hint()}
+function finish(){
+ if(tool==="border"&&draft.length>=3){let n=sel&&sel.k==="n"&&selObj();if(!n){n={id:uid(),name:"Nation "+(S.nations.length+1),color:COLORS[S.nations.length%COLORS.length],polys:[],notes:""};S.nations.push(n)}n.polys.push(draft.map(q=>q.slice()));sel={k:"n",id:n.id};commit()}
+ else if(tool==="line"&&draft.length>=(TERR[O.lkind]?3:2)){const q={id:uid(),name:LINES[O.lkind][0],kind:O.lkind,pts:draft.map(q=>q.slice()),notes:""};S.paths.push(q);sel={k:"l",id:q.id};commit()}
+ else if(tool!=="border"&&tool!=="line")return;
+ setTool("select");setTimeout(()=>{const f=$("#f-name");if(f){f.focus();f.select()}},0)}
+function addPlace(p){const w=tool==="weather",pl={id:uid(),name:w?WX.find(x=>x[0]===O.wx)[1]:"New "+(PT[O.ptype]||"place").toLowerCase(),type:w?"weather":O.ptype,x:p[0],y:p[1],notes:""};if(w)pl.icon=O.wx;else if(PTI[O.ptype])pl.icon=PTI[O.ptype];S.places.push(pl);sel={k:"p",id:pl.id};commit();lists();ins();draw();setTimeout(()=>{const f=$("#f-name");if(f){f.focus();f.select()}},0)}
+function zoom(f,p){const nw=Math.min(9000,Math.max(60,V.w*f));f=nw/V.w;if(p){V.cx=p[0]-(p[0]-V.cx)*f;V.cy=p[1]-(p[1]-V.cy)*f}V.w=nw;draw()}
+function fit(){const a=[];S.nations.forEach(n=>n.polys.forEach(p=>a.push(...p)));S.places.forEach(p=>a.push([p.x,p.y]));S.paths.forEach(q=>a.push(...q.pts));const r=svg.getBoundingClientRect();
+ if(a.length){const xs=a.map(q=>q[0]),ys=a.map(q=>q[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);V.cx=(x0+x1)/2;V.cy=(y0+y1)/2;V.w=Math.max(300,(x1-x0)*1.25,(y1-y0)*1.25*r.width/r.height)}else{V.cx=800;V.cy=500;V.w=1600}draw()}
+function nearest(o,p){let best=1e18,bi=0,br=0,bp=p;rings(o).forEach((q,ri)=>{const n=o.polys||TERR[o.kind]?q.length:q.length-1;for(let i=0;i<n;i++){const[a,b]=q[i],[c,d]=q[(i+1)%q.length],dx=c-a,dy=d-b,t=Math.max(0,Math.min(1,((p[0]-a)*dx+(p[1]-b)*dy)/(dx*dx+dy*dy||1))),x=a+t*dx,y=b+t*dy,e=Math.hypot(p[0]-x,p[1]-y);if(e<best){best=e;bi=i;br=ri;bp=[Math.round(x),Math.round(y)]}}});return[br,bi,bp]}
+function centerOn(k,o){const c=k==="n"?(o.polys.length?big(o):null):k==="p"?[o.x,o.y]:o.pts[0];if(c){V.cx=c[0];V.cy=c[1]}}
+svg.addEventListener("pointerdown",ev=>{if(ev.button>0)return;svg.setPointerCapture(ev.pointerId);ptrs.set(ev.pointerId,[ev.clientX,ev.clientY]);
+ if(ptrs.size===2){drag=null;const a=[...ptrs.values()];pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);return}
+ const t=ev.target.closest("[data-v],[data-k]"),dd=t?t.dataset:{};
+ drag={m:tool==="select"&&dd.v?"v":tool==="select"&&dd.k==="p"?"p":tool==="select"&&dd.k==="n"&&isSel("n",dd.id)?"n":"pan",x:ev.clientX,y:ev.clientY,mv:0,cx:V.cx,cy:V.cy,dd,p0:pt(ev),o:dd.k==="n"&&isSel("n",dd.id)?JSON.stringify(get("n",dd.id).polys):0,pl:dd.k==="n"&&isSel("n",dd.id)?S.places.filter(p=>natOf(p)===get("n",dd.id)).map(p=>[p.id,p.x,p.y]):0}});
+svg.addEventListener("pointermove",ev=>{
+ {const c=pt(ev);$("#coord").textContent=Math.round(c[0]/100*S.kmGrid)+", "+Math.round(c[1]/100*S.kmGrid)+" km"}
+ if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,[ev.clientX,ev.clientY]);
+ if(pinch&&ptrs.size===2){const a=[...ptrs.values()],dd=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(dd>0){zoom(pinch/dd,pt({clientX:(a[0][0]+a[1][0])/2,clientY:(a[0][1]+a[1][1])/2}));pinch=dd}return}
+ const k=V.w/svg.getBoundingClientRect().width;
+ if(drag){const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;if(!drag.mv&&Math.hypot(dx,dy)>5)drag.mv=1;if(!drag.mv)return;
+  if(drag.m==="pan"){V.cx=drag.cx-dx*k;V.cy=drag.cy-dy*k}
+  else if(drag.m==="v"){const[kk,id,ri,vi]=drag.dd.v.split(":");rings(get(kk,id))[+ri][+vi]=P(ev)}
+  else if(drag.m==="n"){const n=get("n",drag.dd.id),c=pt(ev),ox=Math.round(c[0]-drag.p0[0]),oy=Math.round(c[1]-drag.p0[1]);n.polys=JSON.parse(drag.o).map(r=>r.map(a=>[a[0]+ox,a[1]+oy]));drag.pl.forEach(([id,x,y])=>{const p=get("p",id);p.x=x+ox;p.y=y+oy})}
+  else{const p=get("p",drag.dd.id);[p.x,p.y]=P(ev)}
+  draw()}
+ else if(draft.length){cur=P(ev);draw();if(tool==="measure")hint()}});
+svg.addEventListener("pointerup",ev=>{ptrs.delete(ev.pointerId);pinch=0;if(!drag)return;const d=drag;drag=null;
+ if(d.mv){if(d.m!=="pan"){commit();lists();ins()}return}
+ const p=P(ev),k=V.w/svg.getBoundingClientRect().width;
+ if(tool==="border"){if(draft.length>=3&&Math.hypot(p[0]-draft[0][0],p[1]-draft[0][1])<12*k)finish();else{draft.push(p);draw();hint()}}
+ else if(tool==="line"||tool==="measure"){const sp=d.dd.k==="p"?get("p",d.dd.id):null;draft.push(sp?[sp.x,sp.y]:p);draw();hint()}
+ else if(tool==="place"||tool==="weather")addPlace(p);
+ else{const v=d.dd.v?d.dd.v.split(":"):null;pick(d.dd.k?{k:d.dd.k,id:d.dd.id}:v?{k:v[0],id:v[1]}:null)}});
+svg.addEventListener("pointerleave",()=>{$("#coord").textContent=""});
+svg.addEventListener("pointercancel",ev=>{ptrs.delete(ev.pointerId);pinch=0;drag=null});
+svg.addEventListener("wheel",ev=>{ev.preventDefault();zoom(ev.deltaY<0?.85:1/.85,pt(ev))},{passive:false});
+svg.addEventListener("dblclick",ev=>{if(tool!=="select")return;const v=ev.target.closest("[data-v]"),t=ev.target.closest("[data-k]");
+ if(v){const[kk,id,ri,vi]=v.dataset.v.split(":"),o=get(kk,id),q=rings(o)[+ri];if(q.length>(o.polys||TERR[o.kind]?3:2)){q.splice(+vi,1);commit();draw()}}
+ else if(t&&t.dataset.k!=="p"){const o=get(t.dataset.k,t.dataset.id),[ri,i,bp]=nearest(o,pt(ev));rings(o)[ri].splice(i+1,0,bp);commit();draw()}});
+function del(){const s=sel;if(!s)return;if(s.k==="n")S.nations=S.nations.filter(n=>n.id!==s.id);else if(s.k==="p")S.places=S.places.filter(n=>n.id!==s.id);else S.paths=S.paths.filter(n=>n.id!==s.id);sel=null;commit();all()}
+function exportImg(){try{
+ const r=svg.getBoundingClientRect(),cs=getComputedStyle(document.documentElement),c=svg.cloneNode(true),vb=svg.getAttribute("viewBox").split(" ").map(Number),kk=vb[2]/r.width;
+ c.querySelectorAll(".vx").forEach(e=>e.remove());
+ c.querySelector("#seaw").insertAdjacentHTML("beforebegin",`<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="var(--sea)"/>`);
+ if(!$("#o-grid").checked)c.querySelector("#gridr").remove();if(!$("#o-waves").checked)c.querySelector("#seaw").remove();
+ c.querySelector("#layer").insertAdjacentHTML("afterend",`<text x="${vb[0]+16*kk}" y="${vb[1]+36*kk}" font-size="${26*kk}" style="font-family:Literata,Georgia,serif;font-weight:600;fill:var(--ink);stroke:var(--sea);stroke-width:${5*kk};paint-order:stroke">${esc(S.name)}</text>`);
+ if($("#o-legend").checked&&S.nations.length){const ln=S.nations.slice(0,12),lh=22*kk,x0=vb[0]+16*kk,y0=vb[1]+vb[3]-16*kk-ln.length*lh;c.querySelector("#layer").insertAdjacentHTML("afterend",`<g>${ln.map((n,i)=>`<rect x="${x0}" y="${y0+i*lh}" width="${14*kk}" height="${14*kk}" fill="${n.color}"/><text x="${x0+20*kk}" y="${y0+i*lh+12*kk}" font-size="${14*kk}" style="font-family:Literata,Georgia,serif;fill:var(--ink);stroke:var(--sea);stroke-width:${3*kk};paint-order:stroke">${esc(n.name)}</text>`).join("")}</g>`)}
+ c.setAttribute("xmlns","http://www.w3.org/2000/svg");c.setAttribute("width",r.width*2);c.setAttribute("height",r.height*2);
+ const x=new XMLSerializer().serializeToString(c).replace(/var\(--([\w-]+)\)/g,(m,v)=>cs.getPropertyValue("--"+v).trim()),img=new Image();
+ $("#exSvg").href="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(x);$("#exSvg").download=(S.name||"map")+".svg";img.onload=()=>{const cv=document.createElement("canvas");cv.width=r.width*2;cv.height=r.height*2;cv.getContext("2d").drawImage(img,0,0);const u=cv.toDataURL("image/png");$("#exImg").src=u;$("#exDl").href=u;$("#exDl").download=(S.name||"map")+".png";$("#ex").showModal()};
+ img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(x)}catch(e){}}
+function setTheme(c){const b=$("#thBtn");if(c==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",c);b.dataset.th=c;b.textContent="Theme: "+c;try{localStorage.setItem("worldmap.theme",c)}catch(e){}}
+const zoomTo=n=>{const a=n.polys.flat();if(!a.length)return;const xs=a.map(q=>q[0]),ys=a.map(q=>q[1]),r=svg.getBoundingClientRect(),w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);V.cx=(Math.min(...xs)+Math.max(...xs))/2;V.cy=(Math.min(...ys)+Math.max(...ys))/2;V.w=Math.max(300,w*1.5,h*1.5*r.width/r.height)};
+const ids=()=>BR.list().map(m=>m.id),curId=()=>CUR;
+function mapsUI(){$("#o-maps").innerHTML=BR.list().map(m=>`<option value="${esc(m.id)}" ${m.id===CUR?"selected":""}>${esc(m.id===CUR?S.name:m.name)}</option>`).join("")}
+function switchMap(id){BR.flush();CUR=id;BR.setCur(id);S=load();hist=[JSON.stringify(S)];fut=[];sel=null;tool="select";draft=[];$("#wname").value=S.name;$("#s-km").value=S.kmGrid;$("#s-day").value=S.kmDay;all();fit();mapsUI()}
+const ACT={
+ zin:()=>zoom(.8),zout:()=>zoom(1.25),fit,undo,redo,finish,del,
+ cancel:()=>setTool("select"),pop:()=>{draft.pop();draw();hint()},
+ terr:()=>setTool("border"),
+ dup:()=>{const p=selObj(),c={...p,id:uid(),x:p.x+30,y:p.y+30,name:p.name+" copy"};S.places.push(c);sel={k:"p",id:c.id};commit();all()},
+ saveroad:()=>{if(draft.length>1){const q={id:uid(),name:"Road",kind:"road",pts:draft.map(a=>a.slice()),notes:""};S.paths.push(q);sel={k:"l",id:q.id};commit()}setTool("select")},
+ export:exportImg,close:()=>{$("#ex").close();$("#bk").close();$("#kb").close()},
+ backup:()=>{$("#bkText").value=JSON.stringify(S,null,1);$("#bkMsg").textContent="";$("#bkDl").href="data:application/json;charset=utf-8,"+encodeURIComponent($("#bkText").value);$("#bkDl").download=(S.name||"map")+".json";$("#bk").showModal()},
+ load:()=>{try{const d=JSON.parse($("#bkText").value);if(!d||!Array.isArray(d.nations)||!Array.isArray(d.places))throw 0;S=fix(d);sel=null;tool="select";draft=[];commit();$("#wname").value=S.name;all();$("#bk").close()}catch(e){$("#bkMsg").textContent="That text isn’t a valid backup. Paste the full copy you saved and try again."}},
+ keys:()=>$("#kb").showModal(),
+ loadnew:()=>{try{const d=JSON.parse($("#bkText").value);if(!d||!Array.isArray(d.nations)||!Array.isArray(d.places))throw 0;const id=uid();localStorage.setItem(kOf(id),JSON.stringify(fix(d)));localStorage.setItem("worldmap.index",JSON.stringify(ids().concat(id)));switchMap(id);$("#bk").close()}catch(e){$("#bkMsg").textContent="That text isn’t a valid backup. Paste the full copy you saved and try again."}},
+ dupmap:()=>{const id=uid();try{localStorage.setItem(kOf(id),JSON.stringify({...S,name:S.name+" copy"}));localStorage.setItem("worldmap.index",JSON.stringify(ids().concat(id)))}catch(e){}switchMap(id)},
+ mapup:()=>mvMap(-1),mapdn:()=>mvMap(1),
+ newmap:()=>{const id=uid();try{localStorage.setItem("worldmap.index",JSON.stringify(ids().concat(id)))}catch(e){}switchMap(id)},
+ delmap:()=>{const b=$("#delBtn");if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to delete";setTimeout(()=>{b.dataset.arm="";b.textContent="Delete map"},4000);return}b.dataset.arm="";b.textContent="Delete map";const c=curId(),rest=ids().filter(i=>i!==c);if(!rest.length){ACT.reset();return}try{localStorage.setItem("worldmap.index",JSON.stringify(rest));localStorage.removeItem(kOf(c))}catch(e){}switchMap(rest[0])},
+ reset:()=>{S=fix({});sel=null;tool="select";draft=[];commit();$("#wname").value=S.name;all()},
+ theme:()=>{const o=["auto","light","dark"];setTheme(o[(o.indexOf($("#thBtn").dataset.th||"auto")+1)%3])}};
+Object.assign(ACT,{
+ newmap:()=>{BR.create("Untitled map").then(id=>switchMap(id)).catch(()=>{})},
+ dupmap:()=>{BR.create(S.name+" copy",JSON.stringify({...S,name:S.name+" copy"})).then(id=>switchMap(id)).catch(()=>{})},
+ delmap:()=>{const b=$("#delBtn");if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to delete";setTimeout(()=>{b.dataset.arm="";b.textContent="Delete map"},4000);return}b.dataset.arm="";b.textContent="Delete map";BR.remove(CUR).then(()=>{const r=BR.list();if(r.length)switchMap(r[0].id);else BR.create("World map").then(id=>switchMap(id))})},
+ loadnew:()=>{try{const d=JSON.parse($("#bkText").value);if(!d||!Array.isArray(d.nations)||!Array.isArray(d.places))throw 0;BR.create(d.name||"Imported map",JSON.stringify(fix(d))).then(id=>{switchMap(id);$("#bk").close()})}catch(e){$("#bkMsg").textContent="That text isn’t a valid backup. Paste the full copy you saved and try again."}},
+ back:()=>BR.close()});
+document.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.w){O.wx=d.w;tools()}
+ else if(d.ic){const p=selObj();if(p){p.icon=d.ic;commit();ins();lists();draw()}}
+ else if(d.t){if(d.t==="border"&&tool!=="border"&&sel&&sel.k!=="n")sel=null;setTool(d.t)}
+ else if(d.s){const[k,id]=d.s.split(":");pick({k,id});centerOn(k,get(k,id));if(k==="n")zoomTo(get(k,id));draw()}
+ else if(d.a&&ACT[d.a])ACT[d.a]()});
+document.addEventListener("input",ev=>{const t=ev.target,o=selObj();
+ if(t.id==="wname"){S.name=t.value;persist();mapsUI();return}
+ if(t.id==="s-km"){S.kmGrid=Math.max(1,+t.value||100);persist();draw();hint();return}
+ if(t.id==="s-day"){S.kmDay=Math.max(1,+t.value||30);$("#o-pre").value="";persist();hint();return}
+ if(t.id==="find"){O.q=t.value;lists();return}
+ if(/^o-(grid|names|waves|wx|rose|hand|snap|time|ll|terr|lines)$/.test(t.id)){saveOpts();draw();return}
+ if(!o)return;
+ const m={"f-name":()=>o.name=t.value,"f-notes":()=>o.notes=t.value,"f-color":()=>o.color=t.value,"f-pc":()=>o.pcolor=t.value,"f-pop":()=>o.pop=Math.max(0,+t.value||0),"f-icon":()=>o.icon=t.value.trim(),"f-dash":()=>o.dash=t.checked,"f-cap":()=>o.capital=t.checked,"f-type":()=>o.type=t.value,"f-size":()=>o.size=+t.value,"f-kind":()=>o.kind=t.value,"f-ls":()=>o.ls=+t.value,"f-lc":()=>o.lcolor=t.value,"f-lw":()=>o.lw=+t.value};
+ if(m[t.id]){m[t.id]();persist();if(t.id!=="f-notes"){lists();draw()}}});
+document.addEventListener("change",ev=>{const t=ev.target;
+ if(t.id==="o-maps"){switchMap(t.value);return}
+ if(t.id==="o-pre"){if(t.value){S.kmDay=+t.value;$("#s-day").value=t.value;persist();hint()}return}
+ if(t.id==="bkFile"){if(t.files[0])t.files[0].text().then(x=>{$("#bkText").value=x;$("#bkMsg").textContent="File read. Press Load this text to open it."});return}
+ if(t.id==="o-pt"){O.ptype=t.value;hint();return}
+ if(t.id==="o-lk"){O.lkind=t.value;hint();return}
+ if(/^f-/.test(t.id)){commit();if(["f-type","f-kind","f-cap"].includes(t.id)||t.id==="f-icon")ins()}});
+document.addEventListener("keydown",ev=>{
+ const inField=/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName),k=ev.key.toLowerCase();
+ if((ev.ctrlKey||ev.metaKey)&&(k==="z"||k==="y")&&!inField){ev.preventDefault();(k==="y"||ev.shiftKey)?redo():undo();return}
+ if(ev.key==="Enter"&&ev.target.id==="find"){const b=$("#lists .item");if(b)b.click();return}
+ if((ev.ctrlKey||ev.metaKey)&&!inField&&(k==="c"||k==="v")){if(k==="c"){const o=selObj();if(o)clip={k:sel.k,o:JSON.stringify(o),n:0,pl:sel.k==="n"?S.places.filter(p=>natOf(p)===o).map(p=>JSON.stringify(p)):[]}}else if(clip){ev.preventDefault();clip.n++;const o=JSON.parse(clip.o),off=40*clip.n;o.id=uid();o.name=(o.name||"")+" copy";if(clip.k==="n"){o.polys=o.polys.map(r=>r.map(a=>[a[0]+off,a[1]+off]));S.nations.push(o);clip.pl.forEach(j=>{const p=JSON.parse(j);p.id=uid();p.x+=off;p.y+=off;S.places.push(p)})}else if(clip.k==="p"){o.x+=off;o.y+=off;S.places.push(o)}else{o.pts=o.pts.map(a=>[a[0]+off,a[1]+off]);S.paths.push(o)}sel={k:clip.k,id:o.id};commit();all()}return}
+ if(inField||ev.ctrlKey||ev.metaKey||ev.altKey)return;
+ if(ev.key==="+"||ev.key==="="){zoom(.8);return}if(ev.key==="-"){zoom(1.25);return}if(ev.key==="0"){fit();return}
+ if(k==="d"&&sel&&sel.k==="p"){ACT.dup();return}
+ if(k==="g"){const c=$("#o-grid");c.checked=!c.checked;saveOpts();draw();return}
+ if(ev.key==="?"){ACT.keys();return}
+ if(k==="f"&&sel){const o=selObj();if(o){centerOn(sel.k,o);if(sel.k==="n")zoomTo(o);draw()}return}
+ if(ev.key==="/"){ev.preventDefault();O.focus=1;$("#find").focus();O.focus=0;return}
+ const t={v:"select",b:"border",p:"place",l:"line",w:"weather",m:"measure"}[k];if(t&&(tool==="select"||!draft.length)){setTool(t);return}
+ if(ev.key==="Enter"){if(document.activeElement.tagName!=="BUTTON")finish()}
+ else if(ev.key==="Backspace"&&draft.length){draft.pop();draw();hint()}
+ else if(ev.key==="Escape"){if(tool!=="select"||draft.length)setTool("select");else pick(null)}
+ else if(ev.key==="Delete"&&tool==="select")del();
+ else if(ev.key.startsWith("Arrow")&&tool==="select"&&sel&&sel.k==="n"){ev.preventDefault();const n=selObj(),s=ev.shiftKey?25:5,ax=ev.key==="ArrowRight"?s:ev.key==="ArrowLeft"?-s:0,ay=ev.key==="ArrowDown"?s:ev.key==="ArrowUp"?-s:0;S.places.filter(p=>natOf(p)===n).forEach(p=>{p.x+=ax;p.y+=ay});n.polys=n.polys.map(r=>r.map(a=>[a[0]+ax,a[1]+ay]));commit();draw()}
+ else if(ev.key.startsWith("Arrow")&&tool==="select"&&sel&&sel.k==="p"){ev.preventDefault();const p=selObj(),s=ev.shiftKey?25:5;p.x+=ev.key==="ArrowRight"?s:ev.key==="ArrowLeft"?-s:0;p.y+=ev.key==="ArrowDown"?s:ev.key==="ArrowUp"?-s:0;commit();draw()}});
+window.addEventListener("resize",draw);
+
+$("#wname").value=S.name;$("#s-km").value=S.kmGrid;$("#s-day").value=S.kmDay;$("#o-pre").value=[...$("#o-pre").options].some(o=>o.value==S.kmDay)?String(S.kmDay):"";
+const OI=["o-grid","o-waves","o-hand","o-wx","o-rose","o-snap","o-names","o-ll","o-terr","o-lines"];
+function saveOpts(){try{localStorage.setItem("worldmap.opts",JSON.stringify({...Object.fromEntries(OI.map(i=>[i,$("#"+i).checked])),time:$("#o-time").value}))}catch(e){}}
+try{const so=JSON.parse(localStorage.getItem("worldmap.opts")||"{}");OI.forEach(i=>{if(i in so)$("#"+i).checked=so[i]});$("#o-time").value=so.time||""}catch(e){}
+if(!matchMedia("(prefers-reduced-motion:reduce)").matches)$("#waves").insertAdjacentHTML("beforeend","<animateTransform attributeName='patternTransform' type='translate' from='0 0' to='90 0' dur='18s' repeatCount='indefinite'/>");
+let sv=null;try{sv=JSON.parse(null)}catch(e){}
+if(sv&&sv.w>0&&isFinite(sv.cx)&&isFinite(sv.cy)){Object.assign(V,{cx:sv.cx,cy:sv.cy,w:sv.w});all()}else{all();if(S.nations.length||S.places.length||S.paths.length)fit()}
+mapsUI();
+const syncTh=()=>{try{const t=parent.document.documentElement.getAttribute("data-theme");if(t)document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}catch(e){}};syncTh();try{new MutationObserver(syncTh).observe(parent.document.documentElement,{attributes:true,attributeFilter:["data-theme"]})}catch(e){}
+window.__mapSync=()=>{mapsUI();const m=BR.get(CUR);if(!m){const l=BR.list();if(l.length)switchMap(l[0].id);return}const af=document.activeElement;if(BR.pending()||drag||draft.length||(af&&/INPUT|TEXTAREA|SELECT/.test(af.tagName)))return;try{const r=fix(JSON.parse(m.body||"{}"));if(JSON.stringify(r)!==JSON.stringify(S)){S=r;sel=null;hist=[JSON.stringify(S)];fut=[];$("#wname").value=S.name;$("#s-km").value=S.kmGrid;$("#s-day").value=S.kmDay;all()}}catch(e){}};
+<\/script></body></html>
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
@@ -225,7 +587,7 @@ const wc=t=>((t||'').match(/\S+/g)||[]).length;
 let db=null,user=null,myId=null,myName='Guest',names={},novels=[],chapters=[],novelId=null,chapId=null,pending=null;
 let unsubC=null,dirty=false,timer=null,savedAt=0,built=false,armed=false,unsubN2=null,notes=[],tab='ed',drafts=false;
 const nm=id=>id===myId?'you':(names[id]||'Someone');
-function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,4500)}
+function toast(m){const t=$('#toast');t.setAttribute('role','status');t.setAttribute('aria-live','polite');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,4500)}
 function fail(e){toast(e&&e.code==='not_granted'?'You can view this but not edit. Ask the owner to make you a Contributor.':'Something went wrong: '+((e&&e.message)||e))}
 
 app.innerHTML='<p class="wrap muted">Loading…</p>';
@@ -246,7 +608,9 @@ function buildHome(){
   app.innerHTML=`<div class="top"><div class="brand">✒️ Inkwell</div><div class="who">${esc(myName)}</div></div>
   <main class="wrap"><h1>Your novels</h1><p class="muted">Start a story, then share this page’s link with your co-author.</p>
   <div class="row"><input id="nt" placeholder="Novel title"><input id="ns" placeholder="One-line premise (optional)"><button class="pri" id="nc">Create novel</button></div>
-  <div id="list" class="grid"></div></main>`;
+  <input id="hq" type="search" placeholder="Search your novels…" aria-label="Search your novels" style="margin-bottom:14px" hidden><div id="list" class="grid"></div></main>`;
+  $('#nt').onkeydown=$('#ns').onkeydown=e=>{if(e.key==='Enter')$('#nc').click()};
+  $('#hq').oninput=updHome;
   $('#nc').onclick=()=>{
     const title=$('#nt').value.trim();if(!title)return toast('Give your novel a title first.');
     db.collection('novels').add({title,synopsis:$('#ns').value.trim(),by:myId,createdAt:Date.now()}).then(r=>{location.hash=r.id}).catch(fail);
@@ -254,12 +618,14 @@ function buildHome(){
 }
 function updHome(){
   const l=$('#list');if(!l)return;
-  l.innerHTML=novels.length?novels.map(n=>`<a class="card" href="#${n.id}"><h3>${esc(n.title)}</h3><p class="muted">${esc(n.synopsis)}</p><small>Started by ${esc(nm(n.by))}</small></a>`).join(''):'<p class="muted">No novels yet. Create the first one above.</p>';
+  const hq=$('#hq'),q=hq?hq.value.trim().toLowerCase():'';if(hq)hq.hidden=novels.length<5;
+  const vis=q?novels.filter(n=>((n.title||'')+' '+(n.synopsis||'')).toLowerCase().includes(q)):novels;
+  l.innerHTML=vis.length?vis.map(n=>`<a class="card" href="#${n.id}"><h3>${esc(n.title)}</h3><p class="muted">${esc(n.synopsis)}</p><small>Started by ${esc(nm(n.by))}${n.createdAt?' · '+new Date(n.createdAt).toLocaleDateString():''}</small></a>`).join(''):`<p class="muted">${novels.length?'No novels match your search.':'No novels yet. Create the first one above.'}</p>`;
 }
 
 function buildNovel(){
   app.innerHTML=`<div class="top"><a href="#" class="brand" id="back">← Inkwell</a><div class="who" id="pr">${esc(myName)}</div></div>
-  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><button id="rnn" class="pin" hidden>✎ Rename novel</button><div class="row" id="rnr" hidden style="margin:0"><input id="rni" maxlength="120" placeholder="Novel title"><button class="pri" id="rns">Save</button><button id="rnx">Cancel</button></div><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><button id="bqs" title="Quick switcher (Ctrl+O or ⌘+O)">🔍 Jump to… (Ctrl/⌘+O)</button><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bvt">🧠 Vault</button><button id="bbd">📋 Board</button><button id="bac">🔔 Activity</button><button id="bdc">📘 Dictionary</button><button id="bsp">🗂 Spaces</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button><details id="dz" class="dz" hidden><summary>Danger zone</summary><p class="muted"><small>Deleting a novel removes all its chapters, notes and files for everyone, and can’t be undone. Type the novel’s title to confirm.</small></p><input id="dzi" placeholder="Type the novel title" autocomplete="off"><button id="dnv" class="ndel" disabled>Delete novel permanently</button></details></aside>
+  <div class="layout"><aside><h2 id="nvt"></h2><p class="muted" id="nvs"></p><button id="rnn" class="pin" hidden>✎ Rename novel</button><div class="row" id="rnr" hidden style="margin:0"><input id="rni" maxlength="120" placeholder="Novel title"><button class="pri" id="rns">Save</button><button id="rnx">Cancel</button></div><div id="gp"></div><div id="wd"></div><div id="lv"></div><div id="sp"></div><input id="gi" type="number" min="0" placeholder="Word goal (optional)"><button id="bqs" title="Quick switcher (Ctrl+O or ⌘+O)">🔍 Jump to… (Ctrl/⌘+O)</button><input id="sq" placeholder="Search chapters and codex…"><div class="tabs"><button id="bcx">📖 Codex</button><button id="bbk">Read novel</button><button id="bol">Outline</button><button id="btl">Timeline</button><button id="bnt">Notes</button><button id="bvt">🧠 Vault</button><button id="bbd">📋 Board</button><button id="bac">🔔 Activity</button><button id="bdc">📘 Dictionary</button><button id="bsp">🗂 Spaces</button><button id="bmp">🗺 Maps</button><button id="bfl">📎 Files</button><button id="bpr">💡 Prompt</button></div><div class="note" id="pm" hidden></div><div id="chl"></div><button class="pri" id="addc">+ New chapter</button><details id="dz" class="dz" hidden><summary>Danger zone</summary><p class="muted"><small>Deleting a novel removes all its chapters, notes and files for everyone, and can’t be undone. Type the novel’s title to confirm.</small></p><input id="dzi" placeholder="Type the novel title" autocomplete="off"><button id="dnv" class="ndel" disabled>Delete novel permanently</button></details></aside>
   <div class="mainc"><div class="otb" id="otb" hidden></div><section id="ed"><p class="muted">Pick or create a chapter to begin.</p></section></div><div id="qn"></div></div><button id="qnb" class="pri" title="Open quick notes">📝 Notes</button>`;
   $('#back').onclick=async e=>{await save()};
   {let v=null;try{v=localStorage.getItem('ink-qn')}catch(e){}qnSet(v===null?innerWidth>=1200:v==='1',true)}
@@ -305,6 +671,7 @@ function buildNovel(){
    });}
   $('#bsp').onclick=async()=>{await save();chapId=null;updNovel();showSpaces();setPres()};
   $('#bfl').onclick=async()=>{await save();chapId=null;updNovel();showFiles();setPres()};
+  $('#bmp').onclick=async()=>{await save();chapId=null;updNovel();setPres();showMaps()};
   $('#sp').onclick=e=>{const b=e.target.closest('button');if(!b)return;const m=+b.dataset.m;if(m){sprintEnd=Date.now()+m*60000;sprintW=0}else sprintEnd=0;$('#sp').dataset.s='';sprintUI()};
   $('#bpr').onclick=()=>{const p=$('#pm');p.textContent=PROMPTS[Math.floor(Math.random()*PROMPTS.length)];p.hidden=false};
   $('#gi').onchange=e=>db.doc('novels/'+novelId).update({goal:Math.max(0,parseInt(e.target.value)||0)}).catch(fail);
@@ -534,7 +901,7 @@ function showBook(){
   $('#dr').onchange=e=>{drafts=e.target.checked;showBook()};
   $('#bk').onclick=async()=>{
     const dl=await use('downloads');if(!dl)return toast('Downloads aren’t available here.');
-    const data=JSON.stringify({exportedAt:new Date().toISOString(),novel:n,chapters,codex:notes,timeline:evs,notes:memos,vault,pages,spaces},null,2);
+    const data=JSON.stringify({exportedAt:new Date().toISOString(),novel:n,chapters,codex:notes,timeline:evs,notes:memos,vault,pages,spaces,maps:mapList()},null,2);
     try{await dl.save({filename:(n.title||'novel').replace(/[^\w-]+/g,'-')+'-backup.json',data})}catch(e){if(!e||e.code!=='declined')fail(e)}
   };
   $('#eb').onclick=async()=>{
@@ -1630,6 +1997,7 @@ async function zipAll(){
   if(notes.length)z.file('codex.md',notes.map(x=>'## '+x.name+' ('+x.kind+')\n\n'+(x.body||'')).join('\n\n'));
   if(evs.length)z.file('timeline.md',evs.map(e=>'- **'+(e.when||'—')+'** '+e.title+(e.body?'\n  '+e.body.replace(/\n/g,'\n  '):'')).join('\n'));
   if(vault.length)vault.forEach(v=>z.file('vault/'+vtFile(v)+'.md',v.body||''));
+  mapList().forEach(p=>z.file('maps/'+slug(p.title)+'.json',p.body||'{}'));
   if(memos.length)z.file('notes.md',memos.map(m=>'## '+m.title+'\n\n'+(m.body||'')).join('\n\n'));
   spList().forEach(([k,,sn])=>{const l=pages.filter(p=>p.space===k);if(l.length){const d=z.folder('spaces/'+slug(sn));l.forEach((p,i)=>d.file(pad(i)+'-'+slug(p.title)+'.md','# '+p.title+'\n\n'+(p.body||'')))}});
   try{dlSave(slug(n.title||'novel')+'.zip',await z.generateAsync({type:'blob'}))}catch(e){fail(e)}
@@ -1651,7 +2019,7 @@ function subSpaces(){
   const id=novelId;
   unsubSp=db.collection(`novels/${id}/spaces`).orderBy('at').onSnapshot(s=>{spaces=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='spaces'&&!$('#ed').contains(document.activeElement))showSpaces()},()=>{});
   unsubPg=db.collection(`novels/${id}/pages`).onSnapshot(s=>{
-    pages=s.docs.map(d=>({id:d.id,...d.data()}));resolve(pages.map(p=>p.updatedBy));blkRender();
+    const all2=s.docs.map(d=>({id:d.id,...d.data()}));mapDocs=all2.filter(p=>p.space===MAPSP);pages=all2.filter(p=>p.space!==MAPSP);pgLoaded=true;resolve(all2.map(p=>p.updatedBy));blkRender();mapSync();
     if(tab==='files')showFiles();if(tab!=='spaces')return;
     if(!$('#ed').contains(document.activeElement))showSpaces();else pgSync();
   },()=>{});
@@ -1687,17 +2055,44 @@ function showSpaces(){
     x.onclick=()=>{if(x.dataset.a){ref.delete().catch(fail)}else{x.dataset.a=1;x.textContent='Sure?';setTimeout(()=>{delete x.dataset.a;x.textContent='Delete'},3000)}};
   });
 }
+// ---- Maps studio: the embedded World Map Maker. Each map is a page in the novel with space '__map'. ----
+const MAPSP='__map';let mapDocs=[],pgLoaded=false,mapCur=null,mapQ=null,mapT=null,mapFrame=null;const mapGone=new Set();
+const mapList=()=>mapDocs.filter(p=>!mapGone.has(p.id)).sort((a,b)=>(a.at||0)-(b.at||0));
+function mapFlush(){clearTimeout(mapT);mapT=null;if(!mapQ)return;const q=mapQ;mapQ=null;db.doc(q.path).update({title:q.name,body:q.body,updatedBy:myId,updatedAt:Date.now()}).catch(fail)}
+window.addEventListener('beforeunload',mapFlush);document.addEventListener('visibilitychange',()=>{if(document.hidden)mapFlush()});
+window.__inkmap={
+ list:()=>mapList().map(p=>({id:p.id,name:p.title||'Untitled map'})),
+ get:id=>mapList().find(p=>p.id===id)||null,
+ cur:()=>mapCur,setCur:id=>{mapCur=id},pending:()=>!!mapQ,flush:mapFlush,
+ save:(id,name,body)=>{const d0=mapDocs.find(p=>p.id===id);if(d0&&d0.body===body&&d0.title===name&&!(mapQ&&mapQ.id===id))return;if(mapQ&&mapQ.id!==id)mapFlush();mapQ={id,name,body,path:`novels/${novelId}/pages/${id}`};clearTimeout(mapT);mapT=setTimeout(mapFlush,800);const d=mapDocs.find(p=>p.id===id);if(d){d.title=name;d.body=body}},
+ create:async(name,body)=>{const n=Date.now(),b=body||JSON.stringify({name,nations:[],places:[],paths:[],kmGrid:100,kmDay:30}),r=await db.collection(`novels/${novelId}/pages`).add({space:MAPSP,title:name,body:b,by:myId,updatedBy:myId,at:n,updatedAt:n});if(!mapDocs.some(p=>p.id===r.id))mapDocs.push({id:r.id,space:MAPSP,title:name,body:b,by:myId,updatedBy:myId,at:n,updatedAt:n});return r.id},
+ remove:async id=>{mapGone.add(id);if(mapQ&&mapQ.id===id){mapQ=null;clearTimeout(mapT)}await db.doc(`novels/${novelId}/pages/${id}`).delete()},
+ close:()=>mapClose()};
+function mapSync(){if(mapFrame){try{mapFrame.contentWindow.__mapSync&&mapFrame.contentWindow.__mapSync()}catch(e){}}else if(tab==='maps'&&$('#ed')&&!$('#ed').contains(document.activeElement))mapPanel()}
+function mapPanel(){const l=mapList();$('#ed').innerHTML=`<h2>🗺 Maps</h2><p class="muted">Draw nations, borders, cities, rivers and terrain. You and your co-author share these maps live.</p><div class="row"><button class="pri" id="mpo">Open map studio</button></div>`+(l.length?`<div class="grid">${l.map(p=>`<button class="card mpc" data-id="${p.id}" style="text-align:left"><h3>${esc(p.title||'Untitled map')}</h3><small>edited by ${esc(nm(p.updatedBy||p.by))}</small></button>`).join('')}</div>`:'<p class="muted">No maps yet. Open the studio to start one.</p>');$('#mpo').onclick=()=>mapOpen();$('#ed').querySelectorAll('.mpc').forEach(b=>b.onclick=()=>mapOpen(b.dataset.id))}
+function showMaps(){tab='maps';mapPanel();mapOpen()}
+async function mapOpen(id){
+  if(!pgLoaded){toast('Loading maps…');for(let i=0;i<50&&!pgLoaded;i++)await new Promise(r=>setTimeout(r,100))}
+  const l=mapList();
+  if(id&&l.some(p=>p.id===id))mapCur=id;else if(!l.some(p=>p.id===mapCur))mapCur=l.length?l[0].id:await window.__inkmap.create('World map');
+  mapClose(true);
+  const ov=document.createElement('div');ov.id='mapov';const f=document.createElement('iframe');f.title='Map studio';
+  f.srcdoc=document.getElementById('mapsrc').textContent.split('<\\/'+'script>').join('</'+'script>');
+  f.onload=()=>{try{f.contentWindow.focus()}catch(e){}};ov.appendChild(f);document.body.appendChild(ov);mapFrame=f}
+function mapClose(quiet){mapFlush();const ov=document.getElementById('mapov');if(ov)ov.remove();mapFrame=null;if(!quiet&&tab==='maps'&&$('#ed'))mapPanel()}
 function route(){
   const h=location.hash.slice(1),id=/^[\w-]+$/.test(h)?h:null;
   if(id!==novelId||!built){
     novelId=id;chapId=null;chapters=[];pending=null;dirty=false;built=true;otabs=id?otLoad():[];chLoaded=false;if(!id)document.body.classList.remove('hastabs');
-    if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];if(unsubVt){unsubVt();unsubVt=null}vault=[];vtId=null;vtView='notes';if(unsubAc){unsubAc();unsubAc=null}acts=[];
+    if(unsubC){unsubC();unsubC=null}if(unsubN2){unsubN2();unsubN2=null}notes=[];tab='ed';if(unsubCm){unsubCm();unsubCm=null}if(unsubVh){unsubVh();unsubVh=null}if(unsubSt){unsubSt();unsubSt=null}stats=[];vers=[];if(unsubEv){unsubEv();unsubEv=null}evs=[];if(unsubMm){unsubMm();unsubMm=null}if(unsubPm){unsubPm();unsubPm=null}memos=[];pmemos=[];puid=null;pmOk=true;if(unsubPg){unsubPg();unsubPg=null}if(unsubSp){unsubSp();unsubSp=null}mapClose(true);pgLoaded=false;mapDocs=[];pages=[];spaces=[];if(unsubMk){unsubMk();unsubMk=null}mks=[];if(unsubVt){unsubVt();unsubVt=null}vault=[];vtId=null;vtView='notes';if(unsubAc){unsubAc();unsubAc=null}acts=[];
     id?buildNovel():buildHome();
     if(id){subC();subNotes();subStats();subEv();subMemos();subSpaces();subVault();subAct()}setPres();
   }
   refresh();
 }
 window.addEventListener('hashchange',route);
+window.addEventListener('offline',()=>toast('You’re offline. Changes will sync when you reconnect.'));
+window.addEventListener('online',()=>toast('Back online.'));
 window.addEventListener('beforeunload',()=>{save()});
 db.collection('novels').orderBy('createdAt','desc').onSnapshot(s=>{
   novels=s.docs.map(d=>({id:d.id,...d.data()}));
